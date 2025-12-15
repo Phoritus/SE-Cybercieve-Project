@@ -1,0 +1,21 @@
+name: Run tests
+
+on: 
+  push:
+    branches:
+      - main
+    paths:
+      - 'app/**'
+      - 'tests/**'
+      - 'pyproject.toml'
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  filter:
+    runs-on: ubuntu-latest
+    outputs:
+      services: ${{ steps.filter.outputs.changes }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@
