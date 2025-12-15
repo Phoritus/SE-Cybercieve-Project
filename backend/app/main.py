@@ -9,7 +9,6 @@ app = FastAPI()
 
 origins = [
     "http://localhost:5173",
-    
 ]
 
 app.add_middleware(
@@ -21,10 +20,10 @@ app.add_middleware(
 )
 
 
-
 @app.get("/", response_class=HTMLResponse)
 def read_root():
     return HTML_CONTENT
+
 
 app.include_router(router, prefix="/api", tags=["users"])
 
