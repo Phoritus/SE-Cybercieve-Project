@@ -4,3 +4,7 @@ backend:
   - "backend/pyproject.toml"
   - ".github/workflows/test.yaml"
 
+frontend:
+  - "frontend/**"
+  - ".github/workflows/test.yaml"
+

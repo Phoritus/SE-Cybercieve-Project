@@ -1,0 +1,20 @@
+version: 3
+
+tasks:
+  install: 
+    desc: Install dependencies
+    cmds:
+      - npm install
+  install-ci:
+    desc: Install dependencies for CI
+    cmds:
+      - npm ci
+  
+  run:
+    desc: Start the app
+    cmds:
+      - npm run dev
+  tests:
+    desc: Run tests
+    cmds:
+      - npm run test

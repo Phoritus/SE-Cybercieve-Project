@@ -44,7 +44,7 @@ class User(Base):
             raise ValueError("Invalid email format")
         return email
 
-Base.metadata.create_all(engine)
+# Base.metadata.create_all(engine)
 
 def get_db():
     db = SessionLocal()

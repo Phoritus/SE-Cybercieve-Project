@@ -8,6 +8,7 @@ on:
       - 'app/**'
       - 'tests/**'
       - 'pyproject.toml'
+      - 'frontend/**'
   pull_request:
   workflow_dispatch:
 
@@ -18,4 +19,59 @@ jobs:
       services: ${{ steps.filter.outputs.changes }}
     steps:
       - name: Checkout Code
-        uses: actions/checkout@
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - name: filter
+        id: filter
+        uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 #v3.0.2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          filters: .github/utils/file-filter.yaml
+
+  tests:
+    runs-on: ubuntu-latest
+    needs: filter
+    # Handle empty List
+    if: ${{ needs.filter.outputs.services != '[]' && needs.filter.outputs.services != '' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        service: ${{ fromJSON(needs.filter.outputs.services) }}
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+
+      - name: Setup Python
+        if: ${{ startsWith(matrix.service, 'backend') }}
+        uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548 # v6.1.0
+        with:
+          python-version-file: ${{ matrix.service }}/pyproject.toml
+          cache-dependency-path: ${{ matrix.service }}/pyproject.toml
+      - name: Install uv
+        if: ${{ startsWith(matrix.service, 'backend') }}
+        uses: astral-sh/setup-uv@681c641aba71e4a1c380be3ab5e12ad51f415867 # v7.1.6
+        with:
+          enable-cache: true
+      
+      - name: Setup Node
+        if: ${{ startsWith(matrix.service, 'frontend') }}
+        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
+        with:
+          node-version-file: ${{ matrix.service }}/package.json
+          cache: npm
+          cache-dependency-path: ${{ matrix.service }}/package.json
+
+      - name: Install Task
+        uses: supplypike/setup-bin@1fafb085795af4a3f183502f3a9dffa8f7b83217 
+        with:
+          uri: https://github.com/go-task/task/releases/download/v3.45.5/task_linux_amd64.tar.gz
+          name: task
+          version: v3.45.5
+      - name: Insatll app dependencies
+        working-directory: ${{ matrix.service }}
+        run: |
+          task install-ci
+      - name: Run tests
+        working-directory: ${{ matrix.service }}
+        run: |
+          task tests

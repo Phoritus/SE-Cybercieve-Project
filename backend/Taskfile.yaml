@@ -1,0 +1,22 @@
+version: 3
+
+tasks:
+
+  
+  install:
+    desc: Install dependencies
+    cmds:
+      - uv sync
+    
+  install-ci:
+    desc: Install dependencies for CI
+    cmds:
+      - uv sync --locked --all-extras --dev
+
+  tests:
+    desc: Run tests
+    dotenv: ['tests/.env.test']
+    env:
+      PYTHONPATH: '.'
+    cmds:
+      - uv run python -m pytest
