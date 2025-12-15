@@ -6,9 +6,11 @@ from sqlalchemy.orm import Session
 from fastapi import HTTPException
 from uuid import uuid4
 
+
 @pytest.fixture
 def user_service(db_session: Session) -> Userservices:
     return Userservices(db_session)
+
 
 def test_create_user_missing_id_dict(user_service: Userservices):
     # Passing dict without id
