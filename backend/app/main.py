@@ -24,7 +24,7 @@ app.add_middleware(
 def read_root():
     return HTML_CONTENT
 
-
+# Include user-related routes
 app.include_router(router, prefix="/api", tags=["users"])
 
 if __name__ == "__main__":
