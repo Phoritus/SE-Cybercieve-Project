@@ -1,0 +1,12 @@
+# Ignore Devbox generated environment files (cause Windows git add issues)
+.devbox/
+.devbox/**
+
+# Optional: Node and Python typical ignores
+node_modules/
+__pycache__/
+*.pyc
+dist/
+build/
+.venv/
+venv/
