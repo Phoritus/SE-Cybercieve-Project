@@ -19,7 +19,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
 @app.get("/", response_class=HTMLResponse)
 def read_root():
     return HTML_CONTENT
