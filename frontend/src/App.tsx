@@ -27,7 +27,7 @@ const App: React.FC = () => {
                 <Dashboard />
               </ProtectedRoute>
             }
-          />
+          /> {/* TODO: Remove this route after testing */}
           <Route
             path="/profile"
             element={
