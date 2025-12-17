@@ -4,7 +4,7 @@
 #
 
 app = 'backend-snowy-sound-8540'
-primary_region = 'cdg'
+primary_region = 'sin'
 
 [build]
 
