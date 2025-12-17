@@ -1,14 +1,7 @@
 name: Review Deployment
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'backend/app/**'
-      - 'backend/tests/**'
-      - 'backend/pyproject.toml'
-      - 'frontend/**'
+
   pull_request:
     branches:
       - main
