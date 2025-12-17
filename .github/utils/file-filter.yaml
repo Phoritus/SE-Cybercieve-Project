@@ -1,4 +1,5 @@
 backend:
+  - "backend/**"
   - "backend/app/**"
   - "backend/tests/**"
   - "backend/pyproject.toml"

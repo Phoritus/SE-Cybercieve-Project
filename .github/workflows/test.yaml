@@ -49,10 +49,17 @@ jobs:
           AUTO_DETECT='${{ steps.filter.outputs.changes }}'
           if [ -n "$MANUAL_INPUT" ] && [ "$MANUAL_INPUT" != "[]" ]; then
             echo "✅ Using Manual Input"
+            # If input doesn't start with [, wrap it in [] to make it a valid JSON array
+            if [[ "$MANUAL_INPUT" != \[* ]]; then
+              MANUAL_INPUT="[\"$MANUAL_INPUT\"]"
+            fi
             echo "result=$MANUAL_INPUT" >> $GITHUB_OUTPUT
           elif [ -n "$AUTO_DETECT" ] && [ "$AUTO_DETECT" != "[]" ]; then
             echo "✅ Using Auto Detect"
             echo "result=$AUTO_DETECT" >> $GITHUB_OUTPUT
+          else
+            echo "⚠️ No changes or inputs detected"
+            echo "result=[]" >> $GITHUB_OUTPUT
           fi
 
   tests:

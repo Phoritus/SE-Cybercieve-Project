@@ -1,9 +1,10 @@
 import re
-from uuid import UUID, uuid4
+from uuid import UUID
 from app.core.config import config, supabase_config
 from sqlalchemy import create_engine, String
 from sqlalchemy.engine.url import URL
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column,sessionmaker, validates
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, sessionmaker
+from sqlalchemy.orm import validates
 from supabase import create_client, Client
 
 # Create supabase client
