@@ -11,3 +11,4 @@ build/
 .venv/
 venv/
 .vercel
+.env*.local
