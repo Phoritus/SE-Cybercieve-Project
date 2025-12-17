@@ -61,6 +61,6 @@ jobs:
       - name: Delete GitHub Environment
         uses: strumwolf/delete-deployment-environment@a4825dd9648c57da8437a4885c3fcad58beac69c # v3.0.0
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GH_PAT }}
           environment: pr-${{ github.event.pull_request.number }}
           onlyRemoveDeployments: false
