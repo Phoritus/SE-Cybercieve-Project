@@ -43,9 +43,12 @@ class Base(DeclarativeBase):
 class User(Base):
     __tablename__ = "users"
     id: Mapped[UUID] = mapped_column(primary_key=True, nullable=False)
-    username: Mapped[str | None] = mapped_column(String(50), unique=True, nullable=True)
-    first_name: Mapped[str | None] = mapped_column(String(50), nullable=True)
-    last_name: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    username: Mapped[str | None] = mapped_column(
+        String(50), unique=True, nullable=True)
+    first_name: Mapped[str | None] = mapped_column(
+        String(50), nullable=True)
+    last_name: Mapped[str | None] = mapped_column(
+        String(50), nullable=True)
     email: Mapped[str] = mapped_column(String(50), unique=True)
 
     @validates("email")
