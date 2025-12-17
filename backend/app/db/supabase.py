@@ -2,6 +2,7 @@ import re
 from uuid import UUID, uuid4
 from app.core.config import config, supabase_config
 from sqlalchemy import create_engine, String
+from sqlalchemy.engine.url import URL
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column,sessionmaker, validates
 from supabase import create_client, Client
 
@@ -9,7 +10,14 @@ from supabase import create_client, Client
 supabase_client: Client = create_client(supabase_config.SUPABASE_URL, supabase_config.SUPABASE_KEY)
 
 # Construct the SQLAlchemy connection string
-DATABASE_URL = f"postgresql://postgres.pzpegpzfgkwpahrxqzni:{config.PASSWORD}@db.pzpegpzfgkwpahrxqzni.supabase.co:{config.PORT}/{config.DBNAME}"
+DATABASE_URL = URL.create(
+    drivername="postgresql",
+    username="postgres.pzpegpzfgkwpahrxqzni",
+    password=config.PASSWORD,
+    host="db.pzpegpzfgkwpahrxqzni.supabase.co",
+    port=5432,
+    database=config.DBNAME
+)
 EMAIL_REGEX = re.compile(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
 
 # Create the SQLAlchemy engine
