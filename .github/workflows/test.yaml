@@ -39,11 +39,14 @@ jobs:
       
       - name: Determine Output
         id: final
+        env:
+          INPUT_SERVICES: ${{ inputs.services }}
+          FILTER_CHANGES: ${{ steps.filter.outputs.changes }}
         run: |
-          if [ "${{ inputs.services }}" != "" ]; then
-            echo "result=${{ inputs.services }}" >> $GITHUB_OUTPUT
+          if [ "$INPUT_SERVICES" != "" ]; then
+            echo "result=$INPUT_SERVICES" >> $GITHUB_OUTPUT
           else
-            echo "result=${{ steps.filter.outputs.changes }}" >> $GITHUB_OUTPUT
+            echo "result=$FILTER_CHANGES" >> $GITHUB_OUTPUT
           fi
 
   tests:
