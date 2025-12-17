@@ -38,6 +38,7 @@ class Base(DeclarativeBase):
 
 # Create table
 
+
 class User(Base):
     __tablename__ = "users"
     id: Mapped[UUID] = mapped_column(primary_key=True, nullable=False)

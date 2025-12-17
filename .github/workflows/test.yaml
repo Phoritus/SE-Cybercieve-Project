@@ -10,13 +10,23 @@ on:
       - 'pyproject.toml'
       - 'frontend/**'
   workflow_dispatch:
+    inputs:
+      services:
+        description: 'JSON array of services to test (e.g. ["backend"])'
+        required: false
+        type: string
   workflow_call:
+    inputs:
+      services:
+        description: 'JSON array of services to test (e.g. ["backend"])'
+        required: false
+        type: string
 
 jobs:
   filter:
     runs-on: ubuntu-latest
     outputs:
-      services: ${{ steps.filter.outputs.changes }}
+      services: ${{ steps.final.outputs.result }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
@@ -26,6 +36,15 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           filters: .github/utils/file-filter.yaml
+      
+      - name: Determine Output
+        id: final
+        run: |
+          if [ "${{ inputs.services }}" != "" ]; then
+            echo "result=${{ inputs.services }}" >> $GITHUB_OUTPUT
+          else
+            echo "result=${{ steps.filter.outputs.changes }}" >> $GITHUB_OUTPUT
+          fi
 
   tests:
     runs-on: ubuntu-latest
