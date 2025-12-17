@@ -28,10 +28,10 @@ jobs:
       services: ${{ steps.filter.outputs.changes }}
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
       - name: filter
         id: filter
-        uses: dorny/paths-filter@v3
+        uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 #v3.0.2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           filters: .github/utils/file-filter.yaml
@@ -60,7 +60,7 @@ jobs:
       url: https://${{ env.APP_NAME }}.fly.dev
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
       - name: Setup fly
         if: ${{ matrix.service == 'backend' }}
@@ -88,7 +88,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
       - name: Install Flyctl
         uses: superfly/flyctl-actions/setup-flyctl@master

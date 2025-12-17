@@ -12,14 +12,17 @@ on:
   workflow_dispatch:
     inputs:
       services:
-        description: 'Folders to test (JSON format e.g. ["backend", "frontend"])'
+        description: 'Folders to test'
         required: false
-        type: string
+        type: choice
         default: '' 
+        options:
+          - backend
+          - frontend
   workflow_call:
     inputs:
       services:
-        description: 'Folders to test (JSON format)'
+        description: 'Folders to test'
         required: false
         type: string
 
