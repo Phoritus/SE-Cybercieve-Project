@@ -11,7 +11,7 @@ class Config(BaseSettings):
   USER: Optional[str] = os.getenv("DB_USER")
   PASSWORD: Optional[str] = os.getenv("DB_PASSWORD")
   HOST: Optional[str] = os.getenv("DB_HOST")
-  PORT: Optional[str] = os.getenv("DB_PORT")
+  PORT: Optional[str] = os.getenv("DB_PORT") or "5432"
   DBNAME: Optional[str] = os.getenv("DB_NAME")
 
 
