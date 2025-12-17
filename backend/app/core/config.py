@@ -14,6 +14,7 @@ class Config(BaseSettings):
   PORT: Optional[str] = os.getenv("DB_PORT")
   DBNAME: Optional[str] = os.getenv("DB_NAME")
 
+
 class SupabaseConfig(BaseSettings):
   SUPABASE_URL: Optional[str] = os.getenv("SUPABASE_URL")
   SUPABASE_KEY: Optional[str] = os.getenv("SUPABASE_KEY")
