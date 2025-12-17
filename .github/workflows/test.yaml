@@ -1,6 +1,6 @@
 name: Run tests
 
-on: 
+on:
   push:
     branches:
       - main
@@ -12,13 +12,14 @@ on:
   workflow_dispatch:
     inputs:
       services:
-        description: 'JSON array of services to test (e.g. ["backend"])'
+        description: 'Folders to test (JSON format e.g. ["backend", "frontend"])'
         required: false
         type: string
+        default: '' 
   workflow_call:
     inputs:
       services:
-        description: 'JSON array of services to test (e.g. ["backend"])'
+        description: 'Folders to test (JSON format)'
         required: false
         type: string
 
@@ -30,29 +31,30 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
-      - name: filter
+
+      - name: Auto-detect changes
         id: filter
+        if: ${{ inputs.services == '' }}
         uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 #v3.0.2
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
           filters: .github/utils/file-filter.yaml
-      
-      - name: Determine Output
+
+      - name: Determine Services to Test
         id: final
-        env:
-          INPUT_SERVICES: ${{ inputs.services }}
-          FILTER_CHANGES: ${{ steps.filter.outputs.changes }}
         run: |
-          if [ "$INPUT_SERVICES" != "" ]; then
-            echo "result=$INPUT_SERVICES" >> $GITHUB_OUTPUT
-          else
-            echo "result=$FILTER_CHANGES" >> $GITHUB_OUTPUT
+          MANUAL_INPUT='${{ inputs.services }}'
+          AUTO_DETECT='${{ steps.filter.outputs.changes }}'
+          if [ -n "$MANUAL_INPUT" ] && [ "$MANUAL_INPUT" != "[]" ]; then
+            echo "✅ Using Manual Input"
+            echo "result=$MANUAL_INPUT" >> $GITHUB_OUTPUT
+          elif [ -n "$AUTO_DETECT" ] && [ "$AUTO_DETECT" != "[]" ]; then
+            echo "✅ Using Auto Detect"
+            echo "result=$AUTO_DETECT" >> $GITHUB_OUTPUT
           fi
 
   tests:
     runs-on: ubuntu-latest
     needs: filter
-    # Handle empty List
     if: ${{ needs.filter.outputs.services != '[]' && needs.filter.outputs.services != '' }}
     strategy:
       fail-fast: false
@@ -63,25 +65,25 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
-      - name: Setup Python
-        if: ${{ startsWith(matrix.service, 'backend') }}
+      - name: Setup Python (Backend)
+        if: ${{ matrix.service == 'backend' }}
         uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548 # v6.1.0
         with:
-          python-version-file: ${{ matrix.service }}/pyproject.toml
-          cache-dependency-path: ${{ matrix.service }}/pyproject.toml
-      - name: Install uv
-        if: ${{ startsWith(matrix.service, 'backend') }}
+          python-version-file: backend/pyproject.toml
+          
+      - name: Install uv (Backend)
+        if: ${{ matrix.service == 'backend' }}
         uses: astral-sh/setup-uv@681c641aba71e4a1c380be3ab5e12ad51f415867 # v7.1.6
         with:
           enable-cache: true
-      
-      - name: Setup Node
-        if: ${{ startsWith(matrix.service, 'frontend') }}
+
+      - name: Setup Node (Frontend)
+        if: ${{ matrix.service == 'frontend' }}
         uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
         with:
-          node-version-file: ${{ matrix.service }}/package.json
+          node-version-file: frontend/package.json
           cache: npm
-          cache-dependency-path: ${{ matrix.service }}/package.json
+          cache-dependency-path: frontend/package.json
 
       - name: Install Task
         uses: supplypike/setup-bin@1fafb085795af4a3f183502f3a9dffa8f7b83217 
@@ -89,11 +91,13 @@ jobs:
           uri: https://github.com/go-task/task/releases/download/v3.45.5/task_linux_amd64.tar.gz
           name: task
           version: v3.45.5
-      - name: Insatll app dependencies
+
+      - name: Install dependencies
         working-directory: ${{ matrix.service }}
         run: |
           task install-ci
-      - name: Run tests
+
+      - name: Run Tests
         working-directory: ${{ matrix.service }}
         run: |
           task tests
