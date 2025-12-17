@@ -14,8 +14,8 @@ DATABASE_URL = URL.create(
     drivername="postgresql",
     username="postgres.pzpegpzfgkwpahrxqzni",
     password=config.PASSWORD,
-    host="db.pzpegpzfgkwpahrxqzni.supabase.co",
-    port=5432,
+    host="aws-1-ap-southeast-1.pooler.supabase.com",
+    port=6543,
     database=config.DBNAME
 )
 EMAIL_REGEX = re.compile(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
