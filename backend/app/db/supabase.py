@@ -33,10 +33,12 @@ except Exception as e:
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
+
 class Base(DeclarativeBase):
     pass
 
 # Create table
+
 
 class User(Base):
     __tablename__ = "users"

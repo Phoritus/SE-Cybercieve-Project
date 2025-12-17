@@ -22,10 +22,6 @@ env:
   FLY_ORG: ${{ vars.FLY_ORG || 'personal' }}
 
 jobs:
-  test-app:
-    uses: ./.github/workflows/test.yaml
-    secrets: inherit
-
   filter:
     runs-on: ubuntu-latest
     outputs:
@@ -40,9 +36,16 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           filters: .github/utils/file-filter.yaml
 
+  test-specified:
+    needs: filter
+    uses: ./.github/workflows/test.yaml
+    with:
+      services: ${{ needs.filter.outputs.services }}
+    secrets: inherit
+
   review-deploy:
     runs-on: ubuntu-latest
-    needs: [filter, test-app]
+    needs: [filter, test-specified]
     # Handle empty list
     if: ${{ needs.filter.outputs.services != '[]' && needs.filter.outputs.services != '' }}
     strategy:
