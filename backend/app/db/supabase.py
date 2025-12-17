@@ -9,7 +9,7 @@ from supabase import create_client, Client
 supabase_client: Client = create_client(supabase_config.SUPABASE_URL, supabase_config.SUPABASE_KEY)
 
 # Construct the SQLAlchemy connection string
-DATABASE_URL = f"postgresql://postgres.pzpegpzfgkwpahrxqzni:{config.PASSWORD}@{config.HOST}:{config.PORT}/{config.DBNAME}"
+DATABASE_URL = f"postgresql://postgres.pzpegpzfgkwpahrxqzni:{config.PASSWORD}@db.pzpegpzfgkwpahrxqzni.supabase.co:{config.PORT}/{config.DBNAME}"
 EMAIL_REGEX = re.compile(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
 
 # Create the SQLAlchemy engine
