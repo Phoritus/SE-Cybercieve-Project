@@ -1,6 +1,14 @@
-name: Review Deployment to Fly.io
+name: Review Deployment
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'app/**'
+      - 'tests/**'
+      - 'pyproject.toml'
+      - 'frontend/**'
   pull_request:
     branches:
       - main
@@ -14,8 +22,33 @@ env:
   FLY_ORG: ${{ vars.FLY_ORG || 'personal' }}
 
 jobs:
+  test-app:
+    uses: ./.github/workflows/test.yaml
+    secrets: inherit
+
+  filter:
+    runs-on: ubuntu-latest
+    outputs:
+      services: ${{ steps.filter.outputs.changes }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - name: filter
+        id: filter
+        uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 #v3.0.2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          filters: .github/utils/file-filter.yaml
+
   review-deploy:
     runs-on: ubuntu-latest
+    needs: [filter, test-app]
+    # Handle empty list
+    if: ${{ needs.filter.outputs.services != '[]' && needs.filter.outputs.services != '' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        service: ${{ fromJSON(needs.filter.outputs.services) }}
     outputs:
       url: ${{ steps.deploy.outputs.url }}
     # Only run one deployment at a time per PR.
@@ -28,8 +61,10 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+
       - name: Setup fly
         id: deploy
+        if: ${{ matrix.service == 'backend' }}
         uses: superfly/fly-pr-review-apps@f7152c133b1fe7767b6e549ca09598655c1f8ca4
         with:
           name: pr-${{ github.event.pull_request.number }}-${{ github.event.pull_request.head.ref }}

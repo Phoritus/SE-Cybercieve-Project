@@ -37,6 +37,7 @@ class Base(DeclarativeBase):
     pass
 
 # Create table
+
 class User(Base):
     __tablename__ = "users"
     id: Mapped[UUID] = mapped_column(primary_key=True, nullable=False)
@@ -45,7 +46,6 @@ class User(Base):
     last_name: Mapped[str | None] = mapped_column(String(50), nullable=True)
     email: Mapped[str] = mapped_column(String(50), unique=True)
 
-
     @validates("email")
     def validate_email(self, key, email):
         if not EMAIL_REGEX.match(email):
@@ -53,6 +53,7 @@ class User(Base):
         return email
 
 # Base.metadata.create_all(engine)
+
 
 def get_db():
     db = SessionLocal()
