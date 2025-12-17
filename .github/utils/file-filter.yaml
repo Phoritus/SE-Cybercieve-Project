@@ -1,8 +1,5 @@
 backend:
   - "backend/**"
-  - "backend/app/**"
-  - "backend/tests/**"
-  - "backend/pyproject.toml"
   - ".github/workflows/test.yaml"
 
 frontend:
