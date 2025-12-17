@@ -21,4 +21,3 @@ jobs:
           days-before-stale: 0 
           stale-issue-message: 'This issue is stale because it has been open 0 days with no activity.'
           stale-issue-label: 'stale'
-          
