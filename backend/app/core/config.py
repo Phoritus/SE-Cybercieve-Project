@@ -22,6 +22,7 @@ class SupabaseConfig(BaseSettings):
   AUDIENCE: Optional[str] = os.getenv("AUDIENCE")
   ALGORITHM: Optional[str] = os.getenv("ALGORITHM")
 
+
 config = Config()
 supabase_config = SupabaseConfig()
 
