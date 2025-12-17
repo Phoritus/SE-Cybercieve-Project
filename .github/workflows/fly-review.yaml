@@ -34,3 +34,14 @@ jobs:
         with:
           name: pr-${{ github.event.pull_request.number }}-${{ github.event.pull_request.head.ref }}
           path: backend
+          secrets: >
+            DB_USER=${{ secrets.DB_USER }}
+            DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+            DB_HOST=${{ secrets.DB_HOST }}
+            DB_PORT=${{ secrets.DB_PORT }}
+            DB_NAME=${{ secrets.DB_NAME }}
+            SUPABASE_URL=${{ secrets.SUPABASE_URL }}
+            SUPABASE_KEY=${{ secrets.SUPABASE_KEY }}
+            JWKS_URL=${{ secrets.JWKS_URL }}
+            AUDIENCE=${{ secrets.AUDIENCE }}
+            ALGORITHM=${{ secrets.ALGORITHM }}
