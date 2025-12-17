@@ -1,4 +1,4 @@
-name: Review Deployment to Fly.io
+name: Review Deployment
 
 on:
   push:
@@ -64,7 +64,7 @@ jobs:
 
       - name: Setup fly
         id: deploy
-        if: ${{ startsWith(needs.filter.outputs.services, 'backend') }}
+        if: ${{ matrix.service == 'backend' }}
         uses: superfly/fly-pr-review-apps@f7152c133b1fe7767b6e549ca09598655c1f8ca4
         with:
           name: pr-${{ github.event.pull_request.number }}-${{ github.event.pull_request.head.ref }}

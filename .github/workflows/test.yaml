@@ -9,7 +9,6 @@ on:
       - 'tests/**'
       - 'pyproject.toml'
       - 'frontend/**'
-  pull_request:
   workflow_dispatch:
   workflow_call:
 
