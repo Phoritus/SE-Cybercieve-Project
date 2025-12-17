@@ -18,4 +18,7 @@ jobs:
       - name: Run Stale Action
         uses: actions/stale@8f717f0dfca33b78d3c933452e42558e4456c8e7 # v9.1.0
         with:
-          days-before-stale: 30 # Number of days before an issue or PR is marked as stale
+          days-before-stale: 0 
+          stale-issue-message: 'This issue is stale because it has been open 0 days with no activity.'
+          stale-issue-label: 'stale'
+          
