@@ -20,10 +20,10 @@ jobs:
       url: ${{ steps.deploy.outputs.url }}
     # Only run one deployment at a time per PR.
     concurrency:
-      group: ${{ github.event.pull_request.head.ref }}
+      group: pr-${{ github.event.pull_request.number }}
     
     environment:
-      name: ${{ github.event.pull_request.head.ref }}
+      name: pr-${{ github.event.pull_request.number }}
       url: ${{ steps.deploy.outputs.url }}
     steps:
       - name: Checkout Code
@@ -32,4 +32,5 @@ jobs:
         id: deploy
         uses: superfly/fly-pr-review-apps@f7152c133b1fe7767b6e549ca09598655c1f8ca4
         with:
-          name: ${{ github.event.pull_request.head.ref }}
+          name: pr-${{ github.event.pull_request.number }}-${{ github.event.pull_request.head.ref }}
+          path: backend
