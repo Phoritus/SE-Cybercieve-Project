@@ -32,4 +32,5 @@ jobs:
         id: deploy
         uses: superfly/fly-pr-review-apps@f7152c133b1fe7767b6e549ca09598655c1f8ca4
         with:
-          name: pr-${{ github.event.pull_request.number }}
+          name: pr-${{ github.event.pull_request.number }}-${{ github.event.pull_request.head.ref }}
+          path: backend
