@@ -20,3 +20,9 @@ jobs:
         with:
           days-before-stale: 0 
           stale-issue-label: 'stale'
+          stale-issue-message: |
+            Hi there! 👋
+            
+            This issue has been inactive for over 30 days, so I'm marking it as stale.
+            
+            If this is still relevant, please leave a comment below. The bot will automatically remove the stale label. Thank you!
