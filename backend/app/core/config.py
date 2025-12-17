@@ -8,11 +8,11 @@ load_dotenv()
 
 
 class Config(BaseSettings):
-  USER: Optional[str] = os.getenv("user")
-  PASSWORD: Optional[str] = os.getenv("password")
-  HOST: Optional[str] = os.getenv("host")
-  PORT: Optional[str] = os.getenv("port")
-  DBNAME: Optional[str] = os.getenv("dbname")
+  USER: Optional[str] = os.getenv("DB_USER")
+  PASSWORD: Optional[str] = os.getenv("DB_PASSWORD")
+  HOST: Optional[str] = os.getenv("DB_HOST")
+  PORT: Optional[str] = os.getenv("DB_PORT")
+  DBNAME: Optional[str] = os.getenv("DB_NAME")
 
 class SupabaseConfig(BaseSettings):
   SUPABASE_URL: Optional[str] = os.getenv("SUPABASE_URL")
