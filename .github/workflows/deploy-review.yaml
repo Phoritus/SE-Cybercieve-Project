@@ -83,8 +83,28 @@ jobs:
       - name: Checkout
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
       
+      - name: Project name debug info
+        run: |
+          echo "Workspace: ${GITHUB_WORKSPACE}" 
+          echo "Workspace folder name (candidate default project name): $(basename \"${GITHUB_WORKSPACE}\")"
+          echo "APP_NAME (computed): ${APP_NAME}"
+          if [ -n "${VERCEL_ORG_ID:-}" ]; then echo "VERCEL_ORG_ID: set"; else echo "VERCEL_ORG_ID: NOT set"; fi
+          if [ -n "${VERCEL_PROJECT_ID:-}" ]; then echo "VERCEL_PROJECT_ID: set"; else echo "VERCEL_PROJECT_ID: NOT set"; fi
+          if [ -f .vercel/project.json ]; then
+            echo "Found .vercel/project.json; linked Vercel project name:" 
+            node -e "const fs=require('fs'); const j=JSON.parse(fs.readFileSync('.vercel/project.json','utf8')); console.log(j.projectName ?? '(missing projectName)');"
+          else
+            echo "No .vercel/project.json present in workspace"
+          fi
+          if [ -f package.json ]; then
+            echo "package.json name:" 
+            node -e "const p=require('./package.json'); console.log(p.name ?? '(missing name)');"
+          fi
       - name: Install Vercel CLI
         run: npm install -g vercel@latest
+      - name: Check Project Name error
+        run: |
+          echo "Project Name: ${{ env.APP_NAME }}"
       - name: Pull Vercel Environment Information
         run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
       - name: Build Project Artifacts
