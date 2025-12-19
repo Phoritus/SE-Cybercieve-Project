@@ -76,6 +76,10 @@ jobs:
     if: ${{ contains(needs.filter.outputs.services, 'frontend') && github.event.action != 'closed' }}
     runs-on: ubuntu-latest
     needs: [filter, test-specified]
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+      VERCEL_TELEMETRY_DISABLED: 1
     environment:
       name: pr-${{ github.event.pull_request.number }}
       url: ${{ steps.vercel-deploy.outputs.deployment_url }}
@@ -103,17 +107,15 @@ jobs:
       - name: Install Vercel CLI
         run: npm install -g vercel@latest
       - name: Pull Vercel Environment Information
-        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }} --org-id=${{ secrets.VERCEL_ORG_ID }} --project-id=${{ secrets.VERCEL_PROJECT_ID }}
       - name: Build Project Artifacts
-        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel build --token=${{ secrets.VERCEL_TOKEN }} --org-id=${{ secrets.VERCEL_ORG_ID }} --project-id=${{ secrets.VERCEL_PROJECT_ID }}
       - name: Deploy Project Artifacts to Vercel
         id: vercel-deploy
         run: |
-          deployment_url=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }})
+          deployment_url=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }} --org-id=${{ secrets.VERCEL_ORG_ID }} --project-id=${{ secrets.VERCEL_PROJECT_ID }})
           echo "deployment_url=$deployment_url" >> $GITHUB_OUTPUT
-        env:
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        
 
   review-cleanup:
     if: ${{ github.event.action == 'closed' }}
