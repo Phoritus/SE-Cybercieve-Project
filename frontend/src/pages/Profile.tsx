@@ -64,6 +64,7 @@ const Profile: React.FC = () => {
         setError('Failed to load profile');
         setLoading(false);
       }
+      
     };
 
     fetchUser();
