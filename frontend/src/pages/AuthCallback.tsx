@@ -1,8 +1,8 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { supabase } from '../api/supabaseClient';
-import api from '../api/axios';
+import { useAuth } from '@/src/context/AuthContext';
+import { supabase } from '@/src/api/supabaseClient';
+import api from '@/src/api/axios';
 
 const AuthCallback: React.FC = () => {
   const navigate = useNavigate();

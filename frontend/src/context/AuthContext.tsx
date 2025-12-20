@@ -1,5 +1,5 @@
 import React, { createContext, useState, useContext, useEffect, type ReactNode } from 'react';
-import { supabase } from '../api/supabaseClient';
+import { supabase } from '@/src/api/supabaseClient';
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -17,22 +17,32 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      setIsAuthenticated(true);
-    }
-    setLoading(false);
+    // Check active session on mount
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setIsAuthenticated(!!session);
+      setLoading(false);
+    };
+
+    checkSession();
+
+    // Listen for changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsAuthenticated(!!session);
+      setLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
-  const login = (token: string) => {
-    localStorage.setItem('token', token);
-    setIsAuthenticated(true);
+  // Deprecated: kept for compatibility if needed, but state is now managed by listener
+  const login = (_token: string) => {
+    // No-op or custom logic if needed, but Supabase handles session
   };
 
   const logout = async () => {
     await supabase.auth.signOut();
-    localStorage.removeItem('token');
-    setIsAuthenticated(false);
+    // State update handled by onAuthStateChange
   };
 
   const resetPassword = async (email: string) => {

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import api from '../api/axios';
+import { useAuth } from '@/src/context/AuthContext';
+import api from '@/src/api/axios';
 
 const Dashboard: React.FC = () => {
   const { logout } = useAuth();
@@ -33,10 +33,10 @@ const Dashboard: React.FC = () => {
           </button>
         </div>
         <div className="mb-6 flex justify-between items-center">
-            <p className="text-gray-600">Welcome! You are logged in.</p>
-            <Link to="/profile" className="text-blue-500 hover:text-blue-700 font-semibold">Edit Profile</Link>
+          <p className="text-gray-600">Welcome! You are logged in.</p>
+          <Link to="/profile" className="text-blue-500 hover:text-blue-700 font-semibold">Edit Profile</Link>
         </div>
-        
+
         <h3 className="text-xl font-semibold text-gray-700 mb-4">User List (from local DB)</h3>
         <ul className="space-y-2">
           {users.map((user: any) => (
