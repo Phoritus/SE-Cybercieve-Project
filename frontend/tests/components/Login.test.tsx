@@ -1,6 +1,5 @@
 import { vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import { LoginForm } from '@/src/components/login-form';
 
 // Mock specific logic
