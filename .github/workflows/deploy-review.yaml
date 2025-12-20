@@ -80,6 +80,8 @@ jobs:
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
       VERCEL_TELEMETRY_DISABLED: 1
+      VITE_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      VITE_SUPABASE_PUBLISHABLE_OR_ANON_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_OR_ANON_KEY }}
     environment:
       name: pr-${{ github.event.pull_request.number }}
       url: ${{ steps.vercel-deploy.outputs.deployment_url }}
