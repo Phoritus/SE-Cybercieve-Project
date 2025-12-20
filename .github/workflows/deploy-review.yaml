@@ -27,6 +27,33 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           filters: .github/utils/file-filter.yaml
+          
+  review-cleanup:
+    if: ${{ github.event.action == 'closed' }}
+    runs-on: ubuntu-latest
+    permissions:
+      deployments: write
+      contents: read
+    needs: filter
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        
+
+      - name: Install Flyctl
+        uses: superfly/flyctl-actions/setup-flyctl@master
+        if: ${{ contains(needs.filter.outputs.services, 'backend') }}
+      - name: Destroy Fly App
+        if: ${{ contains(needs.filter.outputs.services, 'backend') }}
+        run: flyctl apps destroy ${{ env.APP_NAME }} --yes
+        continue-on-error: true
+
+      - name: Delete GitHub Environment
+        uses: strumwolf/delete-deployment-environment@a4825dd9648c57da8437a4885c3fcad58beac69c # v3.0.0
+        with:
+          token: ${{ secrets.GH_PAT }}
+          environment: pr-${{ github.event.pull_request.number }}
+          onlyRemoveDeployments: false
 
   test-specified:
     if: ${{ github.event.action != 'closed' }}
@@ -117,31 +144,3 @@ jobs:
         run: |
           deployment_url=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }})
           echo "deployment_url=$deployment_url" >> $GITHUB_OUTPUT
-        
-
-  review-cleanup:
-    if: ${{ github.event.action == 'closed' }}
-    runs-on: ubuntu-latest
-    permissions:
-      deployments: write
-      contents: read
-    needs: filter
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
-        
-
-      - name: Install Flyctl
-        uses: superfly/flyctl-actions/setup-flyctl@master
-        if: ${{ contains(needs.filter.outputs.services, 'backend') }}
-      - name: Destroy Fly App
-        if: ${{ contains(needs.filter.outputs.services, 'backend') }}
-        run: flyctl apps destroy ${{ env.APP_NAME }} --yes
-        continue-on-error: true
-
-      - name: Delete GitHub Environment
-        uses: strumwolf/delete-deployment-environment@a4825dd9648c57da8437a4885c3fcad58beac69c # v3.0.0
-        with:
-          token: ${{ secrets.GH_PAT }}
-          environment: pr-${{ github.event.pull_request.number }}
-          onlyRemoveDeployments: false

@@ -12,7 +12,6 @@ import {
 import { Input } from '@/src/components/ui/input'
 import { Label } from '@/src/components/ui/label'
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 
 export function SignUpForm({ className, ...props }: React.ComponentPropsWithoutRef<'div'>) {
   const [email, setEmail] = useState('')
@@ -21,7 +20,6 @@ export function SignUpForm({ className, ...props }: React.ComponentPropsWithoutR
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [success, setSuccess] = useState(false)
-  const navigate = useNavigate()
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -102,7 +100,7 @@ export function SignUpForm({ className, ...props }: React.ComponentPropsWithoutR
               You&apos;ve successfully signed up. Please check your email to confirm your account
               before signing in.
             </p>
-            <Button className="w-full mt-4" onClick={() => navigate('/login')}>
+            <Button className="w-full mt-4" onClick={() => location.href = "/login"}>
               Go to Login
             </Button>
           </CardContent>

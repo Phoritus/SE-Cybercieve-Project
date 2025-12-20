@@ -1,14 +1,6 @@
 name: Run tests
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'app/**'
-      - 'tests/**'
-      - 'pyproject.toml'
-      - 'frontend/**'
   workflow_dispatch:
     inputs:
       services:
