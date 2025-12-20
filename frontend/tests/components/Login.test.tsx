@@ -1,6 +1,17 @@
+import { vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { LoginForm } from '@/src/components/login-form';
 
+// Mock specific logic
+vi.mock('@/src/api/supabaseClient', () => ({
+  supabase: {
+    auth: {
+      // Return a promise that never resolves, so loading state persists indefinitely during test
+      signInWithPassword: vi.fn(() => new Promise(() => { })),
+      signInWithOAuth: vi.fn(),
+    }
+  }
+}));
 
 describe('LoginForm', () => {
   it('should render the login form', () => {
