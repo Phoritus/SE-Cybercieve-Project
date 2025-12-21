@@ -25,4 +25,3 @@ class SupabaseConfig(BaseSettings):
 
 config = Config()
 supabase_config = SupabaseConfig()
-

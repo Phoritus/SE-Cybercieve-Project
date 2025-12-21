@@ -4,7 +4,7 @@ from app.models.users_model import UserRegister
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from fastapi import HTTPException
-from uuid import UUID, uuid4
+from uuid import UUID
 
 class Userservices:
     def __init__(self, db: Session):
@@ -16,8 +16,8 @@ class Userservices:
     def get_user_by_email(self, email: str):
         return self.db.query(DBUser).filter(DBUser.email == email).first()
 
-    def get_user_by_id(self, user_id: str):
-        return self.db.query(DBUser).filter(DBUser.id == UUID(str(user_id))).first()
+    def get_user_by_id(self, user_id: UUID):
+        return self.db.query(DBUser).filter(DBUser.id == user_id).first()
     
     def create_user(self, user: UserRegister | dict):
 
@@ -59,7 +59,7 @@ class Userservices:
         try:
             uuid_obj = UUID(str(user_id))
         except ValueError:
-             raise HTTPException(status_code=400, detail="Invalid UUID format")
+            raise HTTPException(status_code=400, detail="Invalid UUID format")
 
         db_user = self.db.query(DBUser).filter(DBUser.id == uuid_obj).first()
         if not db_user:
@@ -69,10 +69,10 @@ class Userservices:
             if hasattr(user_update, "model_dump"):
                 user_update = user_update.model_dump(exclude_unset=True)
             elif hasattr(user_update, "dict"):
-                 user_update = user_update.dict(exclude_unset=True)
+                user_update = user_update.dict(exclude_unset=True)
             else:
-                 # Fallback/Error or try vars()?
-                 user_update = vars(user_update)
+                # Fallback/Error or try vars()?
+                user_update = vars(user_update)
 
         if user_update.get("username") is not None:
             db_user.username = user_update["username"]
