@@ -35,6 +35,7 @@ jobs:
       - name: Deploy to Fly.io
         uses: superfly/flyctl-actions/setup-flyctl@fc53c09e1bc3be6f54706524e3b82c4f462f77be # v1.5
       - run: |
+          flyctl auth login
           flyctl secrets set \
             DB_USER="${{ secrets.DB_USER }}" \
             DB_PASSWORD="${{ secrets.DB_PASSWORD }}" \
