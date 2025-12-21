@@ -19,8 +19,8 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(securit
         email = payload.get("email")
         user = Userservices(db).get_user_by_email(email)
         if not user:
-             # Fallback to payload if user not in local DB (shouldn't happen if synced)
-             return payload
+            # Fallback to payload if user not in local DB (shouldn't happen if synced)
+            return payload
         return user
     except AuthError as e:
         raise HTTPException(status_code=401, detail=str(e))
@@ -42,8 +42,7 @@ def update_current_user(user_update: UserUpdate, db: Session = Depends(get_db), 
         # Actually, let's just use the email from the token to find the user.
         user = Userservices(db).get_user_by_email(email)
         if not user:
-             raise HTTPException(status_code=404, detail="User not found")
-             
+            raise HTTPException(status_code=404, detail="User not found")
         return Userservices(db).update_user(user.id, user_update.dict(exclude_unset=True))
         
     except AuthError as e:

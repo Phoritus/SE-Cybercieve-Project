@@ -4,7 +4,7 @@ from app.models.users_model import UserRegister
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from fastapi import HTTPException
-from uuid import UUID, uuid4
+from uuid import UUID
 
 class Userservices:
     def __init__(self, db: Session):

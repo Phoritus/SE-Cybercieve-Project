@@ -3,7 +3,7 @@
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = 'backend-snowy-sound-8540'
+app = 'cybersieve-api'
 primary_region = 'sin'
 
 [build]

@@ -82,7 +82,7 @@ jobs:
 
       - name: Setup fly
 
-        uses: superfly/fly-pr-review-apps@f7152c133b1fe7767b6e549ca09598655c1f8ca4
+        uses: superfly/fly-pr-review-apps@f7152c133b1fe7767b6e549ca09598655c1f8ca4 # v1.3.0
         with:
           name: ${{ env.APP_NAME }}
           path: backend
