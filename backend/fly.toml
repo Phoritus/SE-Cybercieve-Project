@@ -1,4 +1,4 @@
-# fly.toml app configuration file generated for backend-snowy-sound-8540 on 2025-12-17T16:10:03+07:00
+# fly.toml app configuration file generated for cybersieve-api on 2025-12-21T11:44:31+07:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
@@ -7,7 +7,7 @@ app = 'cybersieve-api'
 primary_region = 'sin'
 
 [build]
-  dockerfile = "Dockerfile.fly"
+  dockerfile = 'Dockerfile.fly'
 
 [http_service]
   internal_port = 8000

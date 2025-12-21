@@ -10,6 +10,9 @@ concurrency:
   group: deploy
   cancel-in-progress: true
 
+env:
+  FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN_DEPLOY }}
+
 jobs:
   filter:
     runs-on: ubuntu-latest
@@ -35,7 +38,6 @@ jobs:
       - name: Deploy to Fly.io
         uses: superfly/flyctl-actions/setup-flyctl@fc53c09e1bc3be6f54706524e3b82c4f462f77be # v1.5
       - run: |
-          flyctl auth login
           flyctl secrets set \
             DB_USER="${{ secrets.DB_USER }}" \
             DB_PASSWORD="${{ secrets.DB_PASSWORD }}" \
@@ -49,7 +51,7 @@ jobs:
             ALGORITHM="${{ secrets.ALGORITHM }}" \
             --stage
           flyctl deploy --remote-only
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+
   
   deploy-frontend:
     if: ${{ contains(needs.filter.outputs.services, 'frontend') }}
