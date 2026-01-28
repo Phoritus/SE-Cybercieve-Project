@@ -44,6 +44,7 @@ const App: React.FC = () => {
   );
 };
 
+
 const DebugRoute = () => {
   const location = window.location;
   const routerLocation = useLocation();
