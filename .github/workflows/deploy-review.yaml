@@ -7,6 +7,8 @@ on:
       - main
     types: [opened, reopened, synchronize, closed]
 
+  workflow_dispatch:
+
 env:
   FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
   FLY_REGION: ${{ vars.FLY_REGION || 'sin' }}
