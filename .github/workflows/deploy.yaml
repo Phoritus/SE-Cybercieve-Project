@@ -10,6 +10,9 @@ concurrency:
   group: deploy
   cancel-in-progress: true
 
+env:
+  FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN_DEPLOY }}
+
 jobs:
   filter:
     runs-on: ubuntu-latest
@@ -29,6 +32,9 @@ jobs:
     if: ${{ contains(needs.filter.outputs.services, 'backend') }}
     needs: [filter]
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
     steps:
       - name: Checkout Code
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
@@ -48,12 +54,17 @@ jobs:
             ALGORITHM="${{ secrets.ALGORITHM }}" \
             --stage
           flyctl deploy --remote-only
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+
   
   deploy-frontend:
     if: ${{ contains(needs.filter.outputs.services, 'frontend') }}
-    needs: [filter, deploy-backend]
+    needs: [filter]
     runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: frontend
+
     env:
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
@@ -63,11 +74,16 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
-      - name: Install Vercel CLI
-        run: npm install --global vercel@latest
+      - name: Use Node.js 24
+        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
+        with:
+          node-version: 24
+
       - name: Pull Vercel Environment Information
-        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+        run: npx vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
       - name: Build Project Artifacts
-        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+        run: npx vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+
       - name: Deploy Project Artifacts to Vercel
-        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+        run: npx vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}

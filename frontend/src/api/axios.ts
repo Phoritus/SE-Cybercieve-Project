@@ -2,7 +2,7 @@ import axios from 'axios';
 import { supabase } from '@/src/api/supabaseClient';
 
 const api = axios.create({
-  baseURL: 'http://localhost:8000/api',
+  baseURL: 'https://cybersieve-api.fly.dev/api',
   headers: {
     'Content-Type': 'application/json',
   },

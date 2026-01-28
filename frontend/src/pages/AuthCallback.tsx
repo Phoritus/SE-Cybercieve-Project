@@ -6,8 +6,7 @@ import api from '@/src/api/axios';
 
 const AuthCallback: React.FC = () => {
   const navigate = useNavigate();
-  const { login } = useAuth();
-
+  const { login } = useAuth(); // get login function from AuthContext
   useEffect(() => {
     // Check for existing session or listen for auth state change
     const syncUser = async (session: any) => {
