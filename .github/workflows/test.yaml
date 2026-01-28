@@ -1,6 +1,11 @@
 name: Run tests
 
 on:
+  pull_request:
+    branches:
+      - main
+    types: [opened, reopened]
+
   workflow_dispatch:
     inputs:
       services:

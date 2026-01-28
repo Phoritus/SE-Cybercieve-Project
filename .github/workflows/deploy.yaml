@@ -55,7 +55,6 @@ jobs:
             --stage
           flyctl deploy --remote-only
 
-  
   deploy-frontend:
     if: ${{ contains(needs.filter.outputs.services, 'frontend') }}
     needs: [filter]
