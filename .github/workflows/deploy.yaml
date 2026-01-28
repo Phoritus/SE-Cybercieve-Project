@@ -60,6 +60,11 @@ jobs:
     if: ${{ contains(needs.filter.outputs.services, 'frontend') }}
     needs: [filter, deploy-backend]
     runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: frontend
+
     env:
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
@@ -69,6 +74,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - name: Install npm
+        run: npm install
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
       - name: Pull Vercel Environment Information
