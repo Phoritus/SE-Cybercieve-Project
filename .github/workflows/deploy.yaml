@@ -78,14 +78,9 @@ jobs:
         uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
         with:
           node-version: 24
-      
-      - name: Install dependencies
-        run: npm ci
 
       - name: Pull Vercel Environment Information
-        run: |
-          rm -rf .vercel
-          npx vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+        run: npx vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Build Project Artifacts
         run: npx vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
