@@ -58,7 +58,7 @@ jobs:
   
   deploy-frontend:
     if: ${{ contains(needs.filter.outputs.services, 'frontend') }}
-    needs: [filter, deploy-backend]
+    needs: [filter]
     runs-on: ubuntu-latest
 
     defaults:
