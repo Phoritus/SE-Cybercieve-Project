@@ -101,6 +101,9 @@ jobs:
   review-frontend:
     if: ${{ contains(needs.filter.outputs.services, 'frontend') && github.event.action != 'closed' }}
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
     needs: [filter, test-specified]
     env:
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
@@ -122,8 +125,10 @@ jobs:
 
       - name: Pull Vercel Environment Information
         run: npx vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+
       - name: Build Project Artifacts
         run: npx vercel build --token=${{ secrets.VERCEL_TOKEN }}
+
       - name: Deploy Project Artifacts to Vercel
         id: vercel-deploy
         run: |
