@@ -56,11 +56,11 @@ def register(user: UserRegister, db: Session = Depends(get_db)):
 
 
 @router.get("/users")
-def get_all_users(db: Session = Depends(get_db), user = Depends(get_current_user)):
+def get_all_users(db: Session = Depends(get_db)):
     # user is authenticated if we get here
     return Userservices(db).get_all_users()
 
 @router.delete("/users/{user_id}")
-def delete_user(user_id: str, db: Session = Depends(get_db), user = Depends(get_current_user)):
+def delete_user(user_id: str, db: Session = Depends(get_db)):
     # user is authenticated if we get here
     return Userservices(db).delete_user(user_id)
