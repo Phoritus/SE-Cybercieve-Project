@@ -59,7 +59,7 @@ class Userservices:
         try:
             uuid_obj = UUID(str(user_id))
         except ValueError:
-             raise HTTPException(status_code=400, detail="Invalid UUID format")
+            raise HTTPException(status_code=400, detail="Invalid UUID format")
 
         db_user = self.db.query(DBUser).filter(DBUser.id == uuid_obj).first()
         if not db_user:
@@ -69,10 +69,10 @@ class Userservices:
             if hasattr(user_update, "model_dump"):
                 user_update = user_update.model_dump(exclude_unset=True)
             elif hasattr(user_update, "dict"):
-                 user_update = user_update.dict(exclude_unset=True)
+                user_update = user_update.dict(exclude_unset=True)
             else:
-                 # Fallback/Error or try vars()?
-                 user_update = vars(user_update)
+                # Fallback/Error or try vars()?
+                user_update = vars(user_update)
 
         if user_update.get("username") is not None:
             db_user.username = user_update["username"]
@@ -90,11 +90,3 @@ class Userservices:
         except IntegrityError:
             self.db.rollback()
             raise HTTPException(status_code=400, detail="Username already taken")
-
-    def delete_user(self, user_id: str):
-        user = self.get_user_by_id(user_id)
-        if not user:
-            return None
-        self.db.delete(user)
-        self.db.commit()
-        return user
