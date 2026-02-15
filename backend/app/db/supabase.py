@@ -13,10 +13,10 @@ supabase_client: Client = create_client(supabase_config.SUPABASE_URL, supabase_c
 # Construct the SQLAlchemy connection string
 DATABASE_URL = URL.create(
     drivername="postgresql",
-    username="postgres.mtxscjisewecnxzhiwbw",
+    username=config.USER,
     password=config.PASSWORD,
-    host="aws-1-ap-southeast-1.pooler.supabase.com",
-    port=6543,
+    host=config.HOST,
+    port=config.PORT,
     database=config.DBNAME
 )
 EMAIL_REGEX = re.compile(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
