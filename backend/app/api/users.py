@@ -64,3 +64,4 @@ def get_all_users(db: Session = Depends(get_db)):
 def delete_user(user_id: str, db: Session = Depends(get_db)):
     # user is authenticated if we get here
     return Userservices(db).delete_user(user_id)
+
