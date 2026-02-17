@@ -22,6 +22,13 @@ class SupabaseConfig(BaseSettings):
   AUDIENCE: Optional[str] = os.getenv("AUDIENCE")
   ALGORITHM: Optional[str] = os.getenv("ALGORITHM")
 
+class ChatGroqConfig(BaseSettings):
+  GROQ_API_KEY: Optional[str] = os.getenv("GROQ_API_KEY")
+
+class VirusTotalConfig(BaseSettings):
+  VIRUS_TOTAL_API_KEY: Optional[str] = os.getenv("VIRUS_TOTAL_API_KEY")
 
 config = Config()
 supabase_config = SupabaseConfig()
+groq_config = ChatGroqConfig()
+virus_total_config = VirusTotalConfig()

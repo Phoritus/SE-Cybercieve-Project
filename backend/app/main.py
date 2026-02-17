@@ -1,4 +1,6 @@
-from app.api.users import router
+from app.api.users import router as users_router
+from app.api.files_manage import router as files_router
+from app.api.recommend import router as recommend_router
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -25,7 +27,9 @@ def read_root():
     return HTML_CONTENT
 
 
-app.include_router(router, prefix="/api", tags=["users"])
+app.include_router(users_router, prefix="/api", tags=["users"])
+app.include_router(files_router, prefix="/api/files", tags=["files"])
+app.include_router(recommend_router, prefix="/api/recommend", tags=["recommendation"])
 
 if __name__ == "__main__":
     import uvicorn

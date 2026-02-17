@@ -53,8 +53,6 @@ def update_current_user(user_update: UserUpdate, db: Session = Depends(get_db), 
 def register(user: UserRegister, db: Session = Depends(get_db)):
     return AuthService(supabase_client, db).register(user)
 
-
-
 @router.get("/users")
 def get_all_users(db: Session = Depends(get_db)):
     # user is authenticated if we get here
