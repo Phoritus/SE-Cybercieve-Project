@@ -68,6 +68,9 @@ class VirusTotalService:
         if response.status_code == 200:
             analysis_id = response.json()["data"]["id"]
             return analysis_id
+        elif response.status_code == 409:
+            # File already known to VT — fetch existing report by hash instead
+            return self.get_report_by_hash(file_hash)
         else:
             return {"error": f"Failed to upload file: {response.status_code} - {response.text}"}
 
