@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
 
 class FileCreate(BaseModel):
-    file_id: str
+    file_hash: str
     analysis_result: dict

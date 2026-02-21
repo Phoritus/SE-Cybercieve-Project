@@ -8,6 +8,7 @@ import UpdatePassword from './pages/UpdatePassword';
 import Dashboard from './pages/Dashboard';
 import AuthCallback from './pages/AuthCallback';
 import Profile from './pages/Profile';
+import FileScan from './pages/FileScan';
 import ProtectedRoute from './components/ProtectedRoute';
 
 const App: React.FC = () => {
@@ -33,6 +34,14 @@ const App: React.FC = () => {
             element={
               <ProtectedRoute>
                 <Profile />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/scan"
+            element={
+              <ProtectedRoute>
+                <FileScan />
               </ProtectedRoute>
             }
           />

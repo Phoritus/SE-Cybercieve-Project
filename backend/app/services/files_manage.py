@@ -23,9 +23,9 @@ class VirusTotalService:
         """Compute SHA-256 hash of file content."""
         return hashlib.sha256(file_content).hexdigest()
 
-    def _get_existing(self, file_id: str) -> dict | None:
+    def _get_existing(self, file_hash: str) -> dict | None:
         """Check DB for an existing analysis result. Returns the result dict or None."""
-        db_file = self.db.query(DBFile).filter(DBFile.file_id == file_id).first()
+        db_file = self.db.query(DBFile).filter(DBFile.file_hash == file_hash).first()
         if db_file and db_file.analysis_result:
             result = db_file.analysis_result
             if isinstance(result, str):
@@ -38,13 +38,13 @@ class VirusTotalService:
 
     def _save_to_db(self, file_create: FileCreate) -> None:
         """Save or update an analysis result in the database."""
-        db_file = self.db.query(DBFile).filter(DBFile.file_id == file_create.file_id).first()
+        db_file = self.db.query(DBFile).filter(DBFile.file_hash == file_create.file_hash).first()
         if db_file:
             db_file.analysis_result = json.dumps(file_create.analysis_result)
             self.db.commit()
         else:
             try:
-                db_file = DBFile(file_id=file_create.file_id, analysis_result=json.dumps(file_create.analysis_result))
+                db_file = DBFile(file_hash=file_create.file_hash, analysis_result=json.dumps(file_create.analysis_result))
                 self.db.add(db_file)
                 self.db.commit()
             except IntegrityError:
@@ -86,7 +86,7 @@ class VirusTotalService:
         if response.status_code == 200:
             result = response.json()
             # Cache the full report in DB
-            self._save_to_db(FileCreate(file_id=file_hash, analysis_result=result))
+            self._save_to_db(FileCreate(file_hash=file_hash, analysis_result=result))
             return result
         else:
             return {"error": f"Failed to retrieve report: {response.status_code} - {response.text}"}
