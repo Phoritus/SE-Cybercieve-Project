@@ -133,16 +133,16 @@ const FileScan: React.FC = () => {
         return;
       }
 
-      // uploadData should be an analysis URL string
-      const analysisUrl =
+      // uploadData should be an analysis ID string
+      const analysisId =
         typeof uploadData === 'string'
           ? uploadData
-          : uploadData?.data?.links?.self ?? '';
+          : uploadData?.data?.id ?? '';
 
-      if (!analysisUrl) {
+      if (!analysisId) {
         setState({
           step: 'error',
-          message: uploadData?.error ?? 'Upload failed — no analysis URL returned.',
+          message: uploadData?.error ?? 'Upload failed — no analysis ID returned.',
         });
         return;
       }
@@ -157,7 +157,7 @@ const FileScan: React.FC = () => {
 
       const MAX_RETRIES = 60;
       const POLL_INTERVAL = 10_000; // 10 seconds
-      let analysisComplete = false;
+      let resolvedHash = '';
 
       for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
         await delay(POLL_INTERVAL);
@@ -173,13 +173,13 @@ const FileScan: React.FC = () => {
 
         try {
           const analysisRes = await api.get(
-            `/files/vt-analysis/${encodeURIComponent(analysisUrl)}`
+            `/files/vt-analysis/${analysisId}`
           );
-          const status =
-            analysisRes.data?.data?.attributes?.status ?? analysisRes.data?.status;
+          const data = analysisRes.data;
 
-          if (status === 'completed') {
-            analysisComplete = true;
+          // Backend returns the sha256 hash string when analysis is complete
+          if (typeof data === 'string' && data.length > 0 && !data.startsWith('{')) {
+            resolvedHash = data;
             break;
           }
         } catch {
@@ -187,7 +187,7 @@ const FileScan: React.FC = () => {
         }
       }
 
-      if (!analysisComplete) {
+      if (!resolvedHash) {
         setState({
           step: 'error',
           message:
@@ -196,11 +196,11 @@ const FileScan: React.FC = () => {
         return;
       }
 
-      // ── Step 3: Fetch full report ────────────────────
-      setState({ step: 'fetching-report', fileName: file.name, fileHash });
+      // ── Step 3: Fetch full report using the hash from VT ─
+      setState({ step: 'fetching-report', fileName: file.name, fileHash: resolvedHash });
 
       const reportRes = await api.get('/files/vt-report/', {
-        params: { file_hash: fileHash },
+        params: { file_hash: resolvedHash },
       });
 
       if (reportRes.data?.error) {
@@ -211,7 +211,7 @@ const FileScan: React.FC = () => {
       setState({
         step: 'complete',
         fileName: file.name,
-        fileHash,
+        fileHash: resolvedHash,
         report: reportRes.data,
       });
     } catch (err: any) {
