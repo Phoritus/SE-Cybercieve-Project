@@ -1,3 +1,4 @@
+import json
 import re
 from uuid import UUID
 from app.core.config import config, supabase_config
@@ -58,7 +59,12 @@ class User(Base):
             raise ValueError("Invalid email format")
         return email
 
-#Base.metadata.create_all(engine)
+class File(Base):
+    __tablename__ = "files"
+    file_hash: Mapped[str] = mapped_column(String(255), primary_key=True, nullable=False)
+    analysis_result: Mapped[json] = mapped_column(String, nullable=False)
+
+# Base.metadata.create_all(engine)
 
 
 def get_db():
