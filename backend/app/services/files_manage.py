@@ -66,13 +66,14 @@ class VirusTotalService:
         response = requests.post(url, headers=self.headers, files=files)
 
         if response.status_code == 200:
-            analysis_url = response.json()["data"]["links"]["self"]
-            return analysis_url
+            analysis_id = response.json()["data"]["id"]
+            return analysis_id
         else:
             return {"error": f"Failed to upload file: {response.status_code} - {response.text}"}
 
-    def get_analysis_result(self, url: str) -> dict:
-        """Fetch the analysis result from a given URL."""
+    def get_analysis_result(self, analysis_id: str) -> dict:
+        """Fetch the analysis result by analysis ID."""
+        url = f"{self.base_url}/analyses/{analysis_id}"
         response = requests.get(url, headers=self.headers)
         if response.status_code == 200:
             return response.json()
