@@ -9,7 +9,6 @@ from app.services.users import Userservices
 import jwt
 from jwt import PyJWKClient
 
-
 class AuthService:
     def __init__(self, supabase_client: Client, db: Session):
         self.supabase_client = supabase_client
