@@ -9,6 +9,7 @@ import Dashboard from './pages/Dashboard';
 import AuthCallback from './pages/AuthCallback';
 import Profile from './pages/Profile';
 import FileScan from './pages/FileScan';
+import Recommendation from './pages/Recommendation';
 import ProtectedRoute from './components/ProtectedRoute';
 
 const App: React.FC = () => {
@@ -42,6 +43,14 @@ const App: React.FC = () => {
             element={
               <ProtectedRoute>
                 <FileScan />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/recommendation"
+            element={
+              <ProtectedRoute>
+                <Recommendation />
               </ProtectedRoute>
             }
           />

@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { Upload, Search, FileBarChart, AlertCircle, Loader2 } from 'lucide-react';
 import { FileUpload } from '@/src/components/FileUpload';
+import loadingScanSvg from '@/src/assets/loading_scan.svg';
 import { ScanResult } from '@/src/components/ScanResult';
 import api from '@/src/api/axios';
 
@@ -176,7 +177,6 @@ const FileScan: React.FC = () => {
             `/files/vt-analysis/${analysisId}`
           );
           const data = analysisRes.data;
-
           // Backend returns the sha256 hash string when analysis is complete
           if (typeof data === 'string' && data.length > 0 && !data.startsWith('{')) {
             resolvedHash = data;
@@ -265,13 +265,9 @@ const FileScan: React.FC = () => {
             <StepIndicator currentStep={state.step} />
 
             <div className="flex flex-col items-center space-y-4 mt-4">
-              {/* Animated scanner */}
-              <div className="relative w-24 h-24">
-                <div className="absolute inset-0 rounded-full border-2 border-blue-500/30 animate-ping" />
-                <div className="absolute inset-2 rounded-full border-2 border-blue-500/20 animate-ping animation-delay-200" />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <Loader2 className="w-10 h-10 text-blue-400 animate-spin" />
-                </div>
+              {/* Animated bar loader */}
+              <div className="w-16 h-16 flex items-center justify-center">
+                <img src={loadingScanSvg} alt="Loading" className="w-14 h-14" />
               </div>
 
               <p className="text-lg font-medium text-slate-300">

@@ -1421,6 +1421,7 @@ source = { virtual = "." }
 dependencies = [
     { name = "coverage" },
     { name = "fastapi", extra = ["standard"] },
+    { name = "groq" },
     { name = "langchain" },
     { name = "langchain-groq" },
     { name = "psycopg2-binary" },
@@ -1439,6 +1440,7 @@ dependencies = [
 requires-dist = [
     { name = "coverage", specifier = ">=7.6.1" },
     { name = "fastapi", extras = ["standard"], specifier = ">=0.123.5" },
+    { name = "groq", specifier = ">=0.37.1" },
     { name = "langchain", specifier = ">=1.2.10" },
     { name = "langchain-groq", specifier = ">=1.1.2" },
     { name = "psycopg2-binary" },

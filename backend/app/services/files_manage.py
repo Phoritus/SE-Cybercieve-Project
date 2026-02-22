@@ -79,7 +79,7 @@ class VirusTotalService:
         url = f"{self.base_url}/analyses/{analysis_id}"
         response = requests.get(url, headers=self.headers)
         if response.status_code == 200:
-            return response.json()["data"]["meta"]["sha256"]
+            return response.json()["meta"]["file_info"]["sha256"]
         else:
             return {"error": f"Failed to retrieve analysis result: {response.status_code} - {response.text}"}
 
