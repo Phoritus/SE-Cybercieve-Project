@@ -13,7 +13,6 @@ vi.mock('@/src/api/supabaseClient', () => ({
   }
 }));
 
-
 describe('RegisterForm', () => {
   it('should render the register form', () => {
     render(<SignUpForm />);

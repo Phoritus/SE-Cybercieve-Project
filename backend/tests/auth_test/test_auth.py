@@ -6,7 +6,7 @@ import pytest
 import jwt
 from unittest.mock import patch, MagicMock
 from uuid import uuid4
-
+from fastapi import HTTPException
 
 @pytest.fixture
 def auth_service_setup() -> AuthService:
@@ -100,7 +100,7 @@ def test_verify_token_other_error(auth_service_setup):
     # Mock Founded key
     mock_key = mock_jwk_client.get_signing_key_from_jwt.return_value
     mock_key.key = "fake_public_key"
-
+    
     # Mock jwt.decode
     with patch("app.services.auth.jwt.decode", side_effect=Exception) as mock_decode:
         # Call verify_token
