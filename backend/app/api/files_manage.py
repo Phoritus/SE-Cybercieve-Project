@@ -5,13 +5,10 @@ from fastapi import UploadFile, File, APIRouter, Depends
 from sqlalchemy.orm import Session
 
 router = APIRouter()
-
-
 @router.post("/upload-to-vt")
 async def upload_file(file: UploadFile = File(...), db: Session = Depends(get_db)):
     file_content = await file.read()
     return VirusTotalService(db).upload_file(file.filename, file_content, file.content_type)
-
 
 @router.get("/vt-analysis/{analysis_id}")
 def get_analysis_result(analysis_id: str, db: Session = Depends(get_db)):

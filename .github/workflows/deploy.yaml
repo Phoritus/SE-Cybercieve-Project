@@ -50,20 +50,7 @@ jobs:
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
       - name: Deploy to Fly.io
         uses: superfly/flyctl-actions/setup-flyctl@fc53c09e1bc3be6f54706524e3b82c4f462f77be # v1.5
-      - run: |
-          flyctl secrets set \
-            DB_USER="${{ secrets.DB_USER }}" \
-            DB_PASSWORD="${{ secrets.DB_PASSWORD }}" \
-            DB_HOST="${{ secrets.DB_HOST }}" \
-            DB_PORT="${{ secrets.DB_PORT }}" \
-            DB_NAME="${{ secrets.DB_NAME }}" \
-            SUPABASE_URL="${{ secrets.SUPABASE_URL }}" \
-            SUPABASE_KEY="${{ secrets.SUPABASE_KEY }}" \
-            JWKS_URL="${{ secrets.JWKS_URL }}" \
-            AUDIENCE="${{ secrets.AUDIENCE }}" \
-            ALGORITHM="${{ secrets.ALGORITHM }}" \
-            --stage
-          flyctl deploy --remote-only
+      - run: flyctl deploy --remote-only
 
   deploy-frontend:
     if: ${{ contains(needs.filter.outputs.services, 'frontend') }}
