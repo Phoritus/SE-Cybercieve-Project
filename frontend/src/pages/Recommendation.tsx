@@ -5,10 +5,10 @@ import {
   FileBarChart,
   BrainCircuit,
   AlertCircle,
-  Loader2,
   RotateCcw,
 } from 'lucide-react';
 import loadingSvg from '@/src/assets/loading.svg';
+import waitingSvg from '@/src/assets/waiting_rec.svg';
 import { FileUpload } from '@/src/components/FileUpload';
 import api from '@/src/api/axios';
 import ReactMarkdown from 'react-markdown';
@@ -94,7 +94,7 @@ function StepIndicator({ currentStep }: { currentStep: string }) {
                 }`}
               >
                 {isActive ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <img src={waitingSvg} alt="Loading" className="w-5 h-5" />
                 ) : (
                   <Icon className="w-4 h-4" />
                 )}

@@ -1,7 +1,8 @@
 import { useState, useCallback } from 'react';
-import { Upload, Search, FileBarChart, AlertCircle, Loader2 } from 'lucide-react';
+import { Upload, Search, FileBarChart, AlertCircle } from 'lucide-react';
 import { FileUpload } from '@/src/components/FileUpload';
 import loadingScanSvg from '@/src/assets/loading_scan.svg';
+import waitingSvg from '@/src/assets/waiting.svg';
 import { ScanResult } from '@/src/components/ScanResult';
 import api from '@/src/api/axios';
 
@@ -73,7 +74,7 @@ function StepIndicator({ currentStep }: { currentStep: string }) {
                 }`}
               >
                 {isActive ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <img src={waitingSvg} alt="Loading" className="w-5 h-5" />
                 ) : isComplete ? (
                   <Icon className="w-4 h-4" />
                 ) : (
