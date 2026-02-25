@@ -84,18 +84,6 @@ function getThreatInfo(stats: AnalysisStats) {
       detections,
       total,
     };
-  if (detections <= 15)
-    return {
-      level: 'medium' as const,
-      label: 'Medium risk',
-      color: 'text-orange-400',
-      bg: 'bg-orange-500/10',
-      border: 'border-orange-500/30',
-      ring: 'ring-orange-500/20',
-      icon: ShieldAlert,
-      detections,
-      total,
-    };
   return {
     level: 'high' as const,
     label: 'Malicious',
@@ -275,11 +263,10 @@ export function ScanResult({ report, fileName, fileHash, onScanAnother }: ScanRe
           </h3>
           <button
             onClick={() => setFilterDetected(!filterDetected)}
-            className={`text-xs px-3 py-1 rounded-full border transition-colors ${
-              filterDetected
+            className={`text-xs px-3 py-1 rounded-full border transition-colors ${filterDetected
                 ? 'border-red-500/50 text-red-400 bg-red-500/10'
                 : 'border-slate-700 text-slate-500 hover:text-slate-300'
-            }`}
+              }`}
           >
             {filterDetected ? 'Showing detected only' : 'Show detected only'}
           </button>
