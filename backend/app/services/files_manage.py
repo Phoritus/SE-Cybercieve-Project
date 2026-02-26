@@ -7,7 +7,8 @@ from sqlalchemy.exc import IntegrityError
 import hashlib
 import json
 import requests
-
+import magic
+import re
 
 class VirusTotalService:
     def __init__(self, db: Session):
@@ -18,6 +19,13 @@ class VirusTotalService:
             "accept": "application/json",
             "x-apikey": self.api_key,
         }
+
+    def check_file_type(self, file_path: str) -> str:
+        mime_type = magic.from_file(file_path, mime=True)
+        match = re.search(r'/([a-zA-Z0-9]+)$', mime_type)
+        if match:
+            ext = match.group(1)
+            return ext
 
     def _compute_hash(self, file_content: bytes) -> str:
         """Compute SHA-256 hash of file content."""
@@ -94,3 +102,26 @@ class VirusTotalService:
             return result
         else:
             return {"error": f"Failed to retrieve report: {response.status_code} - {response.text}"}
+
+
+if __name__ == "__main__":
+    import sys
+    import os
+
+    # Usage: python -m app.services.files_manage <file_path>
+    if len(sys.argv) < 2:
+        print("Usage: python -m app.services.files_manage <file_path>")
+        sys.exit(1)
+
+    file_path = sys.argv[1]
+    if not os.path.exists(file_path):
+        print(f"Error: File not found: {file_path}")
+        sys.exit(1)
+
+    from app.db.supabase import SessionLocal
+    db = SessionLocal()
+    vt_service = VirusTotalService(db=db)
+    with open(file_path, "rb") as f:
+        content = f.read()
+        content_type = vt_service.check_file_type(file_path)
+        print(f"Content Type: {content_type}")
