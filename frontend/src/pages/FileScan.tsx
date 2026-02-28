@@ -58,20 +58,18 @@ function StepIndicator({ currentStep }: { currentStep: string }) {
           <div key={s.key} className="flex items-center gap-2">
             {i > 0 && (
               <div
-                className={`w-12 h-px transition-colors duration-500 ${
-                  isComplete ? 'bg-blue-400' : 'bg-slate-700'
-                }`}
+                className={`w-12 h-px transition-colors duration-500 ${isComplete ? 'bg-blue-400' : 'bg-slate-700'
+                  }`}
               />
             )}
             <div className="flex items-center gap-2">
               <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-500 ${
-                  isActive
-                    ? 'bg-blue-500/20 ring-2 ring-blue-400 text-blue-400'
-                    : isComplete
+                className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-500 ${isActive
+                  ? 'bg-blue-500/20 ring-2 ring-blue-400 text-blue-400'
+                  : isComplete
                     ? 'bg-blue-500/20 text-blue-400'
                     : 'bg-slate-800 text-slate-600'
-                }`}
+                  }`}
               >
                 {isActive ? (
                   <img src={waitingSvg} alt="Loading" className="w-5 h-5" />
@@ -82,13 +80,12 @@ function StepIndicator({ currentStep }: { currentStep: string }) {
                 )}
               </div>
               <span
-                className={`text-xs font-medium transition-colors ${
-                  isActive
-                    ? 'text-blue-400'
-                    : isComplete
+                className={`text-xs font-medium transition-colors ${isActive
+                  ? 'text-blue-400'
+                  : isComplete
                     ? 'text-slate-400'
                     : 'text-slate-600'
-                }`}
+                  }`}
               >
                 {s.label}
               </span>
@@ -167,9 +164,9 @@ const FileScan: React.FC = () => {
         setState((prev) =>
           prev.step === 'analyzing'
             ? {
-                ...prev,
-                progress: `Polling analysis… (attempt ${attempt}/${MAX_RETRIES})`,
-              }
+              ...prev,
+              progress: `Polling analysis… (attempt ${attempt}/${MAX_RETRIES})`,
+            }
             : prev
         );
 
@@ -178,11 +175,12 @@ const FileScan: React.FC = () => {
             `/files/vt-analysis/${analysisId}`
           );
           const data = analysisRes.data;
-          // Backend returns the sha256 hash string when analysis is complete
-          if (typeof data === 'string' && data.length > 0 && !data.startsWith('{')) {
-            resolvedHash = data;
+          // Backend returns {status, sha256?, report?} — only proceed when completed
+          if (data?.status === 'completed' && data?.sha256) {
+            resolvedHash = data.sha256;
             break;
           }
+          // If queued or in-progress, continue polling
         } catch {
           // Silently retry — analysis may not be ready yet
         }
@@ -197,7 +195,8 @@ const FileScan: React.FC = () => {
         return;
       }
 
-      // ── Step 3: Fetch full report using the hash from VT ─
+      // ── Step 3: Use the report from analysis, or fetch by hash as fallback ─
+
       setState({ step: 'fetching-report', fileName: file.name, fileHash: resolvedHash });
 
       const reportRes = await api.get('/files/vt-report/', {
@@ -262,31 +261,31 @@ const FileScan: React.FC = () => {
         {(state.step === 'uploading' ||
           state.step === 'analyzing' ||
           state.step === 'fetching-report') && (
-          <div className="flex flex-col items-center pt-12">
-            <StepIndicator currentStep={state.step} />
+            <div className="flex flex-col items-center pt-12">
+              <StepIndicator currentStep={state.step} />
 
-            <div className="flex flex-col items-center space-y-4 mt-4">
-              {/* Animated bar loader */}
-              <div className="w-16 h-16 flex items-center justify-center">
-                <img src={loadingScanSvg} alt="Loading" className="w-14 h-14" />
+              <div className="flex flex-col items-center space-y-4 mt-4">
+                {/* Animated bar loader */}
+                <div className="w-16 h-16 flex items-center justify-center">
+                  <img src={loadingScanSvg} alt="Loading" className="w-14 h-14" />
+                </div>
+
+                <p className="text-lg font-medium text-slate-300">
+                  {state.step === 'uploading' && 'Uploading file to scanner…'}
+                  {state.step === 'analyzing' && 'Analyzing file with security engines…'}
+                  {state.step === 'fetching-report' && 'Fetching detailed report…'}
+                </p>
+
+                <p className="text-sm text-slate-500">
+                  {'fileName' in state && state.fileName}
+                </p>
+
+                {state.step === 'analyzing' && (
+                  <p className="text-xs text-slate-600">{state.progress}</p>
+                )}
               </div>
-
-              <p className="text-lg font-medium text-slate-300">
-                {state.step === 'uploading' && 'Uploading file to scanner…'}
-                {state.step === 'analyzing' && 'Analyzing file with security engines…'}
-                {state.step === 'fetching-report' && 'Fetching detailed report…'}
-              </p>
-
-              <p className="text-sm text-slate-500">
-                {'fileName' in state && state.fileName}
-              </p>
-
-              {state.step === 'analyzing' && (
-                <p className="text-xs text-slate-600">{state.progress}</p>
-              )}
             </div>
-          </div>
-        )}
+          )}
 
         {/* Error */}
         {state.step === 'error' && (

@@ -89,47 +89,24 @@ class LLMService:
     def get_response(self, json_data: str) -> str:
         
         json_data = self.filter_json(json_data)    
+
         prompt = f"""
-        Act as a Cybersecurity Analyst.
-        You are given a JSON report containing "file_info", "scan_summary", "threat_details", "sandbox_analysis", and "behavioral_indicators".
-        Extract the requested information from the JSON and format it EXACTLY according to the Markdown template below.
-        STRICT RULES:
-        1. If a value is missing, or if an array/object is empty (e.g., []), output "None detected" or "N/A".
-        2. Do not modify the Markdown formatting.
-        TASK:
-        Fill out the template below. For the "Initial Guidance & Remediation" section, select the correct bullet points based on the "malicious_count" value.
-        OUTPUT FORMAT TEMPLATE:
-        ## 🛡️ Initial Security Assessment Report
+Act as a Cybersecurity Analyst.
+Based on the provided JSON data, generate **ONLY** a concise 'Initial Guidance & Remediation' section.
+**STRICT RULES:**
+1. **Formatting:** Use bullet points. Keep each point short and actionable (no long paragraphs).
+2. **Style:** Each point must start with a relevant emoji (e.g., 🛑, 🔍, ⚠️, 🗑️, ✅).
+3. **Content:** - If `malicious` count > 0: Focus on **Isolate, Verify, and Remove**.
+* If `malicious` count is 0: Focus on **Standard Safety**.
+4. **Flexibility:** Do not follow a fixed script. Provide professional recommendations based on the specific threats found in the JSON.
 
-        **📄 File Information**
-        * **Name:** [Extract `file_name` from `file_info`]
-        * **Type:** [Extract `file_type` from `file_info`]
-        * **Hash (SHA-256):** [Extract `sha-256` from `file_info`]
+**Write your professional, customized recommendation with emojis here. If malicious_count > 0, prioritize isolation and source verification. If 0, focus on safety and monitoring.**
 
-        **🚨 Detection Overview**
-        * **Score:** [Extract `malicious_count`] out of [Extract `total_engines`] engines detected this file.
-        * **Threat Identifier:** [If `threat_details` has data, list the engine and malware_name. If empty, write "None detected"]
-        * **Sandbox Verdict:** [If `sandbox_analysis` has data, list the verdict and confidence. If empty, write "N/A"]
+**INPUT JSON:**
+{json_data}
 
-        **⚙️ Behavioral Indicators**
-        * **Suspicious Capabilities:** [If `suspicious_imports` has data, list them. If empty, write "None detected"]
+    """
 
-        ---
-        ### 🛠️ Initial Guidance & Remediation
-
-        [IF `malicious_count` IS 0, OUTPUT ONLY THIS BLOCK:]
-        * ✅ **Safe / Benign:** The file has no detections and appears safe.
-        * 🔍 **Standard Hygiene:** No immediate action or quarantine required. Proceed with normal handling.
-
-        [IF `malicious_count` IS GREATER THAN 0, OUTPUT ONLY THIS BLOCK:]
-        * 🛑 **Isolate:** Temporarily restrict network access for the affected host to prevent potential lateral movement.
-        * 🔍 **Verify Source:** Determine if the file was downloaded from a verified, official provider.
-        * ⚠️ **Review Execution:** Check system logs for the execution of the identified suspicious capabilities.
-        * 🗑️ **Quarantine/Remove:** If the source is unknown or unverified, immediately quarantine or delete the file.
-        * ✅ **Monitor:** Continue monitoring the endpoint for anomalous activities or unexpected process spawns.
-        INPUT JSON:
-        {json_data}
-        """
         messages = [
             ("system", "You are a helpful and precise cybersecurity analyst."),
             ("human", prompt)

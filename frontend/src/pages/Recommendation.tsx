@@ -24,11 +24,11 @@ type RecState =
   | { step: 'fetching-report'; fileName: string }
   | { step: 'generating'; fileName: string }
   | {
-      step: 'complete';
-      fileName: string;
-      fileHash: string;
-      recommendation: string;
-    }
+    step: 'complete';
+    fileName: string;
+    fileHash: string;
+    recommendation: string;
+  }
   | { step: 'error'; message: string };
 
 /* ------------------------------------------------------------------ */
@@ -78,20 +78,18 @@ function StepIndicator({ currentStep }: { currentStep: string }) {
           <div key={s.key} className="flex items-center gap-2">
             {i > 0 && (
               <div
-                className={`w-10 h-px transition-colors duration-500 ${
-                  isComplete ? 'bg-purple-400' : 'bg-slate-700'
-                }`}
+                className={`w-10 h-px transition-colors duration-500 ${isComplete ? 'bg-purple-400' : 'bg-slate-700'
+                  }`}
               />
             )}
             <div className="flex items-center gap-2">
               <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-500 ${
-                  isActive
-                    ? 'bg-purple-500/20 ring-2 ring-purple-400 text-purple-400'
-                    : isComplete
+                className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-500 ${isActive
+                  ? 'bg-purple-500/20 ring-2 ring-purple-400 text-purple-400'
+                  : isComplete
                     ? 'bg-purple-500/20 text-purple-400'
                     : 'bg-slate-800 text-slate-600'
-                }`}
+                  }`}
               >
                 {isActive ? (
                   <img src={waitingSvg} alt="Loading" className="w-5 h-5" />
@@ -100,13 +98,12 @@ function StepIndicator({ currentStep }: { currentStep: string }) {
                 )}
               </div>
               <span
-                className={`text-xs font-medium transition-colors ${
-                  isActive
-                    ? 'text-purple-400'
-                    : isComplete
+                className={`text-xs font-medium transition-colors ${isActive
+                  ? 'text-purple-400'
+                  : isComplete
                     ? 'text-slate-400'
                     : 'text-slate-600'
-                }`}
+                  }`}
               >
                 {s.label}
               </span>
@@ -179,9 +176,9 @@ const Recommendation: React.FC = () => {
           setState((prev) =>
             prev.step === 'analyzing'
               ? {
-                  ...prev,
-                  progress: `Polling analysis… (attempt ${attempt}/${MAX_RETRIES})`,
-                }
+                ...prev,
+                progress: `Polling analysis… (attempt ${attempt}/${MAX_RETRIES})`,
+              }
               : prev
           );
 
@@ -190,14 +187,12 @@ const Recommendation: React.FC = () => {
               `/files/vt-analysis/${analysisId}`
             );
             const data = analysisRes.data;
-            if (
-              typeof data === 'string' &&
-              data.length > 0 &&
-              !data.startsWith('{')
-            ) {
-              resolvedHash = data;
+            // Backend returns {status, sha256?, report?} — only proceed when completed
+            if (data?.status === 'completed' && data?.sha256) {
+              resolvedHash = data.sha256;
               break;
             }
+            // If queued or in-progress, continue polling
           } catch {
             // Silently retry
           }
@@ -214,7 +209,7 @@ const Recommendation: React.FC = () => {
 
         fileHash = resolvedHash;
 
-        // ── Step 3: Fetch full VT report ───────────────
+        // ── Step 3: Use report from analysis, or fetch by hash as fallback ─
         setState({ step: 'fetching-report', fileName: file.name });
 
         const reportRes = await api.get('/files/vt-report/', {
@@ -297,35 +292,35 @@ const Recommendation: React.FC = () => {
           state.step === 'analyzing' ||
           state.step === 'fetching-report' ||
           state.step === 'generating') && (
-          <div className="flex flex-col items-center pt-12">
-            <StepIndicator currentStep={state.step} />
+            <div className="flex flex-col items-center pt-12">
+              <StepIndicator currentStep={state.step} />
 
-            <div className="flex flex-col items-center space-y-4 mt-4">
-              {/* Animated bar loader */}
-              <div className="w-16 h-16 flex items-center justify-center">
-                <img src={loadingSvg} alt="Loading" className="w-14 h-14" />
+              <div className="flex flex-col items-center space-y-4 mt-4">
+                {/* Animated bar loader */}
+                <div className="w-16 h-16 flex items-center justify-center">
+                  <img src={loadingSvg} alt="Loading" className="w-14 h-14" />
+                </div>
+
+                <p className="text-lg font-medium text-slate-300">
+                  {state.step === 'uploading' && 'Uploading file to scanner…'}
+                  {state.step === 'analyzing' &&
+                    'Analyzing file with security engines…'}
+                  {state.step === 'fetching-report' &&
+                    'Fetching detailed report…'}
+                  {state.step === 'generating' &&
+                    'Generating AI recommendation…'}
+                </p>
+
+                <p className="text-sm text-slate-500">
+                  {'fileName' in state && state.fileName}
+                </p>
+
+                {state.step === 'analyzing' && (
+                  <p className="text-xs text-slate-600">{state.progress}</p>
+                )}
               </div>
-
-              <p className="text-lg font-medium text-slate-300">
-                {state.step === 'uploading' && 'Uploading file to scanner…'}
-                {state.step === 'analyzing' &&
-                  'Analyzing file with security engines…'}
-                {state.step === 'fetching-report' &&
-                  'Fetching detailed report…'}
-                {state.step === 'generating' &&
-                  'Generating AI recommendation…'}
-              </p>
-
-              <p className="text-sm text-slate-500">
-                {'fileName' in state && state.fileName}
-              </p>
-
-              {state.step === 'analyzing' && (
-                <p className="text-xs text-slate-600">{state.progress}</p>
-              )}
             </div>
-          </div>
-        )}
+          )}
 
         {/* Error */}
         {state.step === 'error' && (
