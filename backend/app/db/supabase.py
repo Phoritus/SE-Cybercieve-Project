@@ -63,6 +63,7 @@ class File(Base):
     __tablename__ = "files"
     file_hash: Mapped[str] = mapped_column(String(255), primary_key=True, nullable=False)
     analysis_result: Mapped[json] = mapped_column(String, nullable=False)
+    file_type: Mapped[str | None] = mapped_column(String(50), nullable=True)
 
 # Base.metadata.create_all(engine)
 

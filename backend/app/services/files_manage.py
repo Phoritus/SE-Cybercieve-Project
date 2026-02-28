@@ -1,14 +1,17 @@
-from app.core.config import virus_total_config
-from app.db.supabase import File as DBFile
-from app.models.files_model import FileCreate
-
-from sqlalchemy.orm import Session
-from sqlalchemy.exc import IntegrityError
+from pathlib import Path
 import hashlib
 import json
-import requests
-import magic
 import re
+
+import magic
+import requests
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import Session
+
+from app.core.config import virus_total_config
+from app.db.supabase import File as DBFile
+from app.models.files_model import FileCreate, MIME_TO_EXT
+
 
 class VirusTotalService:
     def __init__(self, db: Session):
@@ -20,12 +23,39 @@ class VirusTotalService:
             "x-apikey": self.api_key,
         }
 
-    def check_file_type(self, file_path: str) -> str:
-        mime_type = magic.from_file(file_path, mime=True)
-        match = re.search(r'/([a-zA-Z0-9]+)$', mime_type)
-        if match:
-            ext = match.group(1)
-            return ext
+    def _ext_from_name(self, name: str) -> str | None:
+        """Pull extension from path or filename, support compound extensions like .tar.gz"""
+        p = Path(name)
+        suffixes = p.suffixes
+        if not suffixes:
+            return None
+        return "".join(suffixes)
+
+    def check_file_type(
+        self,
+        filename: str | None = None,
+        file_content: bytes | None = None,
+    ) -> str | None:
+        """Return file extension from uploaded data (filename sent in upload) e.g. .exe, .pdf
+        Use filename first (from tuple sent to VT); if no extension in filename, then use file_content + MIME.
+        """
+        if filename:
+            ext = self._ext_from_name(filename)
+            if ext:
+                return ext
+        if file_content is not None:
+            try:
+                mime_type = magic.from_buffer(file_content, mime=True)
+            except Exception:
+                return None
+            if mime_type and mime_type in MIME_TO_EXT:
+                return MIME_TO_EXT[mime_type]
+            if mime_type:
+                match = re.search(r"/([a-zA-Z0-9+-]+)$", mime_type)
+                if match:
+                    return "." + match.group(1).lower()
+            return None
+        return None
 
     def _compute_hash(self, file_content: bytes) -> str:
         """Compute SHA-256 hash of file content."""
@@ -49,10 +79,16 @@ class VirusTotalService:
         db_file = self.db.query(DBFile).filter(DBFile.file_hash == file_create.file_hash).first()
         if db_file:
             db_file.analysis_result = json.dumps(file_create.analysis_result)
+            if file_create.file_type is not None:
+                db_file.file_type = file_create.file_type
             self.db.commit()
         else:
             try:
-                db_file = DBFile(file_hash=file_create.file_hash, analysis_result=json.dumps(file_create.analysis_result))
+                db_file = DBFile(
+                    file_hash=file_create.file_hash,
+                    analysis_result=json.dumps(file_create.analysis_result),
+                    file_type=file_create.file_type,
+                )
                 self.db.add(db_file)
                 self.db.commit()
             except IntegrityError:
@@ -61,10 +97,12 @@ class VirusTotalService:
     def upload_file(self, filename: str, file_content: bytes, content_type: str) -> dict | str:
         """Upload a file to VirusTotal. If the file hash already exists in DB, return the cached result."""
         file_hash = self._compute_hash(file_content)
+        file_type = self.check_file_type(filename=filename, file_content=file_content)
 
         # Check if analysis result already exists in DB
         existing = self._get_existing(file_hash)
         if existing:
+            self._save_to_db(FileCreate(file_hash=file_hash, analysis_result=existing, file_type=file_type))
             return {"cached": True, "file_hash": file_hash, "analysis_result": existing}
 
         # Not in DB — upload to VirusTotal
@@ -78,7 +116,7 @@ class VirusTotalService:
             return analysis_id
         elif response.status_code == 409:
             # File already known to VT — fetch existing report by hash instead
-            return self.get_report_by_hash(file_hash)
+            return self.get_report_by_hash(file_hash, file_type=file_type)
         else:
             return {"error": f"Failed to upload file: {response.status_code} - {response.text}"}
 
@@ -91,37 +129,13 @@ class VirusTotalService:
         else:
             return {"error": f"Failed to retrieve analysis result: {response.status_code} - {response.text}"}
 
-    def get_report_by_hash(self, file_hash: str) -> dict:
+    def get_report_by_hash(self, file_hash: str, file_type: str | None = None) -> dict:
         url = f"{self.base_url}/files/{file_hash}"
         response = requests.get(url, headers=self.headers)
 
         if response.status_code == 200:
             result = response.json()
-            # Cache the full report in DB
-            self._save_to_db(FileCreate(file_hash=file_hash, analysis_result=result))
+            self._save_to_db(FileCreate(file_hash=file_hash, analysis_result=result, file_type=file_type))
             return result
         else:
             return {"error": f"Failed to retrieve report: {response.status_code} - {response.text}"}
-
-
-if __name__ == "__main__":
-    import sys
-    import os
-
-    # Usage: python -m app.services.files_manage <file_path>
-    if len(sys.argv) < 2:
-        print("Usage: python -m app.services.files_manage <file_path>")
-        sys.exit(1)
-
-    file_path = sys.argv[1]
-    if not os.path.exists(file_path):
-        print(f"Error: File not found: {file_path}")
-        sys.exit(1)
-
-    from app.db.supabase import SessionLocal
-    db = SessionLocal()
-    vt_service = VirusTotalService(db=db)
-    with open(file_path, "rb") as f:
-        content = f.read()
-        content_type = vt_service.check_file_type(file_path)
-        print(f"Content Type: {content_type}")

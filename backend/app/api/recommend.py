@@ -1,6 +1,6 @@
 from app.services.llm import LLMService
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter
 
 router = APIRouter()
 @router.post("/recommendation")
