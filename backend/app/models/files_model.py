@@ -28,6 +28,20 @@ MIME_TO_EXT: dict[str, str] = {
     "application/msword": ".doc",
     "application/vnd.ms-excel": ".xls",
     "application/octet-stream": ".bin",
+    # Video
+    "video/mp4": ".mp4",
+    "video/webm": ".webm",
+    "video/quicktime": ".mov",
+    # Audio
+    "audio/mpeg": ".mp3",
+    "audio/wav": ".wav",
+    # Data/Programming
+    "text/csv": ".csv",
+    "application/xml": ".xml",
+    "text/markdown": ".md",
+    # Modern Images
+    "image/heic": ".heic",
+    "image/avif": ".avif",
 }
 
 
