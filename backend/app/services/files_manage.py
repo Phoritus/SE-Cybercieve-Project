@@ -68,9 +68,12 @@ class VirusTotalService:
             result = db_file.analysis_result
             if isinstance(result, str):
                 try:
-                    return json.loads(result)
+                    result = json.loads(result)
                 except json.JSONDecodeError:
                     return None
+            # Still no real analysis (just save file_type for later)
+            if isinstance(result, dict) and (not result or result.get("_pending")):
+                return None
             return result
         return None
 
@@ -113,6 +116,8 @@ class VirusTotalService:
 
         if response.status_code == 200:
             analysis_id = response.json()["data"]["id"]
+            # Save file_type immediately because if we wait for GET /vt-report/ later, there will be no filename
+            self._save_to_db(FileCreate(file_hash=file_hash, analysis_result={"_pending": True}, file_type=file_type))
             return analysis_id
         elif response.status_code == 409:
             # File already known to VT — fetch existing report by hash instead
