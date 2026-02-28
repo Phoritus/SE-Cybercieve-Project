@@ -5,7 +5,11 @@ ENV UV_LINK_MODE=hardlink
 
 WORKDIR /code
 
-# # Install dependencies using UV
+# python-magic on Linux needs system libmagic (python-magic-bin has no Linux wheel)
+RUN apt-get update && apt-get install -y --no-install-recommends libmagic1 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install dependencies using UV
 COPY pyproject.toml uv.lock ./
 RUN uv sync --frozen --no-dev --no-install-project
 

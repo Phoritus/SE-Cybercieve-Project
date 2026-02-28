@@ -20,5 +20,6 @@ dependencies = [
     "langchain>=1.2.10",
     "requests>=2.32.5",
     "groq>=0.37.1",
-    "python-magic-bin>=0.4.14",
+    "python-magic; sys_platform == 'linux'",
+    "python-magic-bin>=0.4.14; sys_platform != 'linux'",
 ]
