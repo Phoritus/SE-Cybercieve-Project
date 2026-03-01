@@ -226,7 +226,7 @@ export function ScanResult({ report, fileName, fileHash, onScanAnother }: ScanRe
         <InfoCard
           icon={<FileType className="w-4 h-4 text-blue-400" />}
           label="Type"
-          value={attrs.magika ?? 'Unknown'}
+          value={attrs.magika ?? attrs.type_description ?? 'Unknown'}
         />
         <InfoCard
           icon={<Hash className="w-4 h-4 text-blue-400" />}
