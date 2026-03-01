@@ -11,8 +11,8 @@ async def upload_file(file: UploadFile = File(...), db: Session = Depends(get_db
     return VirusTotalService(db).upload_file(file.filename, file_content, file.content_type)
 
 @router.get("/vt-analysis/{analysis_id}")
-def get_analysis_result(analysis_id: str, db: Session = Depends(get_db)):
-    return VirusTotalService(db).get_analysis_result(analysis_id)
+def get_analysis_result(analysis_id: str, file_hash: str | None = None, db: Session = Depends(get_db)):
+    return VirusTotalService(db).get_analysis_result(analysis_id, file_hash=file_hash)
 
 
 @router.get("/vt-report/")

@@ -48,14 +48,8 @@ interface ScanResultProps {
 /* ------------------------------------------------------------------ */
 
 function getThreatInfo(stats: AnalysisStats) {
-  const total =
-    stats.malicious +
-    stats.suspicious +
-    stats.undetected +
-    stats.harmless +
-    stats.timeout +
-    stats['type-unsupported'] +
-    stats.failure;
+  // Only count engines that actually scanned (exclude type-unsupported, timeout, failure)
+  const total = stats.malicious + stats.suspicious + stats.undetected + stats.harmless;
 
   const detections = stats.malicious + stats.suspicious;
 
@@ -263,8 +257,8 @@ export function ScanResult({ report, fileName, fileHash, onScanAnother }: ScanRe
           <button
             onClick={() => setFilterDetected(!filterDetected)}
             className={`text-xs px-3 py-1 rounded-full border transition-colors ${filterDetected
-                ? 'border-red-500/50 text-red-400 bg-red-500/10'
-                : 'border-slate-700 text-slate-500 hover:text-slate-300'
+              ? 'border-red-500/50 text-red-400 bg-red-500/10'
+              : 'border-slate-700 text-slate-500 hover:text-slate-300'
               }`}
           >
             {filterDetected ? 'Showing detected only' : 'Show detected only'}

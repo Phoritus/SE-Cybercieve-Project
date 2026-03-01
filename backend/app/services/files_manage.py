@@ -39,6 +39,12 @@ class VirusTotalService:
             # Still no real analysis (just save file_type for later)
             if isinstance(result, dict) and (not result or result.get("_pending")):
                 return None
+            # Reject cached results with empty/zero analysis stats (stale data)
+            stats = (result.get("data", {}) or {}).get("attributes", {}).get("last_analysis_stats", {})
+            if stats:
+                total = sum(stats.get(k, 0) for k in ["malicious", "suspicious", "undetected", "harmless", "timeout", "type-unsupported", "failure"])
+                if total == 0:
+                    return None
             return result
         return None
 
@@ -93,7 +99,7 @@ class VirusTotalService:
         else:
             return {"error": f"Failed to upload file: {response.status_code} - {response.text}"}
 
-    def get_analysis_result(self, analysis_id: str) -> dict:
+    def get_analysis_result(self, analysis_id: str, file_hash: str | None = None) -> dict:
         url = f"{self.base_url}/analyses/{analysis_id}"
         response = requests.get(url, headers=self.headers)
         if response.status_code == 200:
@@ -102,9 +108,31 @@ class VirusTotalService:
             status = attrs["status"]
 
             if status != "completed":
+                # /analyses/{id} is slow to update, but /files/{hash} may already
+                # have the full report. Check it as a fallback.
+                if file_hash:
+                    file_url = f"{self.base_url}/files/{file_hash}"
+                    file_resp = requests.get(file_url, headers=self.headers)
+                    if file_resp.status_code == 200:
+                        report = file_resp.json()
+                        stats = report.get("data", {}).get("attributes", {}).get("last_analysis_stats", {})
+                        total = sum(stats.get(k, 0) for k in [
+                            "malicious", "suspicious", "undetected", "harmless",
+                            "timeout", "type-unsupported", "failure"
+                        ])
+                        # Only accept if engines actually reported (not stale/empty)
+                        if total > 0:
+                            file_type = report.get("data", {}).get("attributes", {}).get("type_extension")
+                            self._save_to_db(FileCreate(file_hash=file_hash, analysis_result=report, file_type=file_type))
+                            return {"status": "completed", "sha256": file_hash, "report": report}
                 return {"status": status}
             else:
                 sha256 = data.get("meta", {}).get("file_info", {}).get("sha256", "")
+                # Immediately fetch the full report so frontend doesn't need an extra round-trip
+                if sha256:
+                    report = self.get_report_by_hash(sha256)
+                    if report and not report.get("error"):
+                        return {"status": status, "sha256": sha256, "report": report}
                 return {"status": status, "sha256": sha256}
         else:
             return {"error": f"Failed to retrieve report: {response.status_code} - {response.text}"}

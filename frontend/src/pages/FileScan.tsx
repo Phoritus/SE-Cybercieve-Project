@@ -172,7 +172,7 @@ const FileScan: React.FC = () => {
 
         try {
           const analysisRes = await api.get(
-            `/files/vt-analysis/${analysisId}`
+            `/files/vt-analysis/${analysisId}`, { params: { file_hash: fileHash } }
           );
           const data = analysisRes.data;
           // Backend returns {status, sha256?, report?} — only proceed when completed
