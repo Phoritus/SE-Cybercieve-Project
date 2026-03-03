@@ -63,7 +63,7 @@ describe('FileScan Page Integration Test' ,() =>{
         });
 
         expect(api.post).toHaveBeenCalledTimes(1);
-    });//it2
+    });
 
     it('3. Should display an error massage when api connection fails' , async()=>{
         (api.post as any).mockRejectedValueOnce({
@@ -80,5 +80,5 @@ describe('FileScan Page Integration Test' ,() =>{
             expect(screen.getByText(/Server Down/i)).toBeInTheDocument();
             expect(screen.getByRole('button', { name: /Try Again/i }))
         });
-    });//it3
+    });
 });
