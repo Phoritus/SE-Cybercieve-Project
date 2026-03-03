@@ -12,7 +12,7 @@ vi.mock('@/src/api/axios', () => ({
 }));
 
 describe('Recommendation Page Test', () => {
-    // 2. Mock Crypto และ File Buffer
+    // 2. Mock Crypto and File Buffer
     beforeAll(() => {
         File.prototype.arrayBuffer = vi.fn().mockResolvedValue(new ArrayBuffer(32));
         const mockCrypto = {
@@ -23,7 +23,7 @@ describe('Recommendation Page Test', () => {
     });
 
     beforeEach(() => {
-        // ⚠️ สำคัญมาก: เปลี่ยนมาใช้ resetAllMocks เพื่อล้างพฤติกรรม Mock ของข้อเก่าทิ้งให้หมด
+        // Use resetAllMocks to clear all previous mock behaviors
         vi.resetAllMocks();
     });
 
@@ -33,7 +33,7 @@ describe('Recommendation Page Test', () => {
     });
 
     it('2. Should process successfully and show AI recommendation (Cached scenario)', async () => {
-        // ใช้ท่า Chain Mock: ครั้งแรกคือ Upload-to-VT, ครั้งที่สองคือ Recommendation
+        
         (api.post as any)
             .mockResolvedValueOnce({
                 data: {
@@ -50,12 +50,12 @@ describe('Recommendation Page Test', () => {
 
         render(<Recommendation />);
 
-        // จำลองการอัปโหลดไฟล์
+        // Simulate file upload
         const file = new File(['dummy content'], 'virus.exe', { type: 'application/x-msdownload' });
         const input = screen.getByLabelText(/Choose file/i);
         fireEvent.change(input, { target: { files: [file] } });
 
-        // รอจนกว่าจะแสดงหน้าจอเสร็จสมบูรณ์
+        // Wait until the screen is fully rendered
         await waitFor(() => {
             expect(screen.getByText('AI Security Analysis')).toBeInTheDocument();
             expect(screen.getByText('virus.exe')).toBeInTheDocument();
@@ -64,7 +64,7 @@ describe('Recommendation Page Test', () => {
     });
 
     it('3. Should display an error message when API fails', async () => {
-        // จำลองเซิร์ฟเวอร์พัง
+        // Simulate server failure
         (api.post as any).mockRejectedValueOnce({
             response: { data: { error: 'Server Down. Please try again.' } },
         });
@@ -75,7 +75,7 @@ describe('Recommendation Page Test', () => {
         const input = screen.getByLabelText(/Choose file/i);
         fireEvent.change(input, { target: { files: [file] } });
 
-        // ตรวจสอบว่าโชว์ข้อความ Error บนหน้าจอ
+        
         await waitFor(() => {
             expect(screen.getByText(/Server Down/i)).toBeInTheDocument();
             expect(screen.getByRole('button', { name: /Try again/i })).toBeInTheDocument();
@@ -83,7 +83,7 @@ describe('Recommendation Page Test', () => {
     });
 
     it('4. Should reset to idle state when "Try again" or "Scan another" is clicked', async () => {
-        // จำลองให้พังเพื่อจะโชว์ปุ่ม Try again
+        // Simulate failure to show the Try again button
         (api.post as any).mockRejectedValueOnce({
             response: { data: { error: 'Upload Failed' } },
         });
@@ -98,11 +98,14 @@ describe('Recommendation Page Test', () => {
             expect(screen.getByText(/Upload Failed/i)).toBeInTheDocument();
         });
 
-        // กดปุ่ม Try again
+        // Click the Try again button
         const tryAgainButton = screen.getByRole('button', { name: /Try again/i });
         fireEvent.click(tryAgainButton);
 
-        // หน้าจอต้องกลับมาหน้าแรก
+        
         expect(screen.getByText(/AI Security Recommendation/i)).toBeInTheDocument();
     });
+
+
+    
 });
