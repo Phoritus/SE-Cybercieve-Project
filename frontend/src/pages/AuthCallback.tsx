@@ -30,7 +30,7 @@ const AuthCallback: React.FC = () => {
         }
 
         login(session.access_token);
-        navigate('/dashboard');
+        navigate('/scan');
       }
     };
 

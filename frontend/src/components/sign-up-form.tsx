@@ -5,13 +5,11 @@ import { Button } from '@/src/components/ui/button'
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
 } from '@/src/components/ui/card'
 import { Input } from '@/src/components/ui/input'
 import { Label } from '@/src/components/ui/label'
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 
 export function SignUpForm({ className, ...props }: React.ComponentPropsWithoutRef<'div'>) {
   const [email, setEmail] = useState('')
@@ -88,38 +86,31 @@ export function SignUpForm({ className, ...props }: React.ComponentPropsWithoutR
   }
 
   return (
-    <div className={cn('flex flex-col gap-6', className)} {...props}>
+    <div className={cn('flex flex-col gap-5', className)} {...props}>
       {success ? (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-2xl">Thank you for signing up!</CardTitle>
-            <CardDescription>Check your email to confirm</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">
+        <Card className="border-slate-800 bg-slate-900/30 py-0 shadow-none backdrop-blur-sm">
+          <CardContent className="p-6">
+            <p className="text-sm text-slate-300">
               You&apos;ve successfully signed up. Please check your email to confirm your account
               before signing in.
             </p>
-            <Button className="w-full mt-4" onClick={() => location.href = "/login"}>
+            <Button className="mt-4 h-10 w-full bg-blue-500 text-white hover:bg-blue-400" onClick={() => location.href = "/login"}>
               Go to Login
             </Button>
           </CardContent>
         </Card>
       ) : (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-2xl">Sign up</CardTitle>
-            <CardDescription>Create a new account</CardDescription>
-          </CardHeader>
-          <CardContent>
+        <Card className="border-slate-800 bg-slate-900/30 py-0 shadow-none backdrop-blur-sm">
+          <CardContent className="p-6">
             <form onSubmit={handleSignUp}>
-              <div className="flex flex-col gap-6">
+              <div className="flex flex-col gap-4">
                 <div className="grid gap-2">
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="email" className="text-slate-100">Email</Label>
                   <Input
                     id="email"
                     type="email"
-                    placeholder="m@example.com"
+                    placeholder="Enter your email"
+                    className="h-10 border-slate-800 bg-slate-800/70 text-slate-100 placeholder:text-slate-500 focus-visible:border-blue-500 focus-visible:ring-blue-500/30"
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -127,11 +118,19 @@ export function SignUpForm({ className, ...props }: React.ComponentPropsWithoutR
                 </div>
                 <div className="grid gap-2">
                   <div className="flex items-center">
-                    <Label htmlFor="password">Password</Label>
+                    <Label htmlFor="password" className="text-slate-100">Password</Label>
+                    <Link
+                      to="/forgot-password"
+                      className="ml-auto inline-block text-sm text-slate-300 transition-colors hover:text-white"
+                    >
+                      Forgot your password?
+                    </Link>
                   </div>
                   <Input
                     id="password"
                     type="password"
+                    placeholder="Enter your password"
+                    className="h-10 border-slate-800 bg-slate-800/70 text-slate-100 placeholder:text-slate-500 focus-visible:border-blue-500 focus-visible:ring-blue-500/30"
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
@@ -139,34 +138,36 @@ export function SignUpForm({ className, ...props }: React.ComponentPropsWithoutR
                 </div>
                 <div className="grid gap-2">
                   <div className="flex items-center">
-                    <Label htmlFor="repeat-password">Repeat Password</Label>
+                    <Label htmlFor="repeat-password" className="text-slate-100">Confirm Password</Label>
                   </div>
                   <Input
                     id="repeat-password"
                     type="password"
+                    placeholder="Enter your password"
+                    className="h-10 border-slate-800 bg-slate-800/70 text-slate-100 placeholder:text-slate-500 focus-visible:border-blue-500 focus-visible:ring-blue-500/30"
                     required
                     value={repeatPassword}
                     onChange={(e) => setRepeatPassword(e.target.value)}
                   />
                 </div>
-                {error && <p className="text-sm text-red-500">{error}</p>}
-                <Button type="submit" className="w-full" disabled={isLoading}>
+                {error && <p className="text-sm text-red-400">{error}</p>}
+                <Button type="submit" className="h-10 w-full bg-blue-500 text-white hover:bg-blue-400" disabled={isLoading}>
                   {isLoading ? 'Creating an account...' : 'Sign up'}
                 </Button>
               </div>
-              <div className="mt-4 flex flex-col gap-2">
-                <Button variant="outline" className="w-full" onClick={handleGoogleLogin} type="button">
+              <div className="mt-3.5 flex flex-col gap-2">
+                <Button variant="outline" className="h-10 w-full border-blue-500/60 bg-transparent text-slate-100 hover:bg-blue-500/10 hover:text-white" onClick={handleGoogleLogin} type="button">
                   Sign up with Google
                 </Button>
-                <Button variant="outline" className="w-full" onClick={handleGithubLogin} type="button">
+                <Button variant="outline" className="h-10 w-full border-blue-500/60 bg-transparent text-slate-100 hover:bg-blue-500/10 hover:text-white" onClick={handleGithubLogin} type="button">
                   Sign up with GitHub
                 </Button>
               </div>
-              <div className="mt-4 text-center text-sm">
+              <div className="mt-3.5 text-center text-sm text-slate-300">
                 Already have an account?{' '}
-                <a href="/login" className="underline underline-offset-4">
+                <Link to="/login" className="text-blue-400 transition-colors hover:text-blue-300">
                   Login
-                </a>
+                </Link>
               </div>
             </form>
           </CardContent>

@@ -1,10 +1,12 @@
-import { useState, useCallback } from 'react';
-import { Upload, Search, FileBarChart, AlertCircle } from 'lucide-react';
+import { useState, useCallback, useEffect } from 'react';
+import { Upload, Search, FileBarChart, AlertCircle, CircleUserRound } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { FileUpload } from '@/src/components/FileUpload';
 import loadingScanSvg from '@/src/assets/loading_scan.svg';
 import waitingSvg from '@/src/assets/waiting.svg';
 import { ScanResult } from '@/src/components/ScanResult';
 import api from '@/src/api/axios';
+import { supabase } from '@/src/api/supabaseClient';
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -103,6 +105,30 @@ function StepIndicator({ currentStep }: { currentStep: string }) {
 
 const FileScan: React.FC = () => {
   const [state, setState] = useState<ScanState>({ step: 'idle' });
+  const [profile, setProfile] = useState({ name: 'User', handle: '@profile' });
+
+  useEffect(() => {
+    const loadProfile = async () => {
+      const { data } = await supabase.auth.getUser();
+      const user = data.user;
+      if (!user) return;
+
+      const emailName = user.email?.split('@')[0] ?? 'user';
+      const fullName = user.user_metadata?.full_name || user.user_metadata?.name;
+      const safeName = (fullName || emailName)
+        .split(/[_\-.\s]+/)
+        .filter(Boolean)
+        .map((w: string) => w.charAt(0).toUpperCase() + w.slice(1))
+        .join(' ');
+
+      setProfile({
+        name: safeName || 'User',
+        handle: `@${(user.user_metadata?.user_name || emailName).replace(/\s+/g, '_')}`,
+      });
+    };
+
+    loadProfile();
+  }, []);
 
   const handleFileScan = useCallback(async (file: File) => {
     try {
@@ -236,9 +262,18 @@ const FileScan: React.FC = () => {
           <h1 className="text-xl font-bold tracking-tight">
             <span className="text-blue-400">Cyber</span>Sieve
           </h1>
-          <span className="text-xs text-slate-600 hidden sm:inline">
-            Powered by VirusTotal
-          </span>
+          <div className="flex items-center gap-4">
+            <Link
+              to="/profile"
+              className="inline-flex items-center gap-3 rounded-lg border border-slate-700 bg-slate-900/60 px-3 py-1.5 hover:border-blue-500/60 transition-colors"
+            >
+              <div className="text-right leading-tight">
+                <p className="text-sm font-semibold text-slate-100">{profile.name}</p>
+                <p className="text-xs text-slate-500">{profile.handle}</p>
+              </div>
+              <CircleUserRound className="h-8 w-8 text-blue-400" />
+            </Link>
+          </div>
         </div>
       </header>
 

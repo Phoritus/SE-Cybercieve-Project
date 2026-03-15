@@ -1,11 +1,12 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
+import { useAuth } from './context/AuthContext';
+import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import ForgotPassword from './pages/ForgotPassword';
 import UpdatePassword from './pages/UpdatePassword';
-import Dashboard from './pages/Dashboard';
 import AuthCallback from './pages/AuthCallback';
 import Profile from './pages/Profile';
 import FileScan from './pages/FileScan';
@@ -17,19 +18,11 @@ const App: React.FC = () => {
     <AuthProvider>
       <Router>
         <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/update-password" element={<UpdatePassword />} />
+          <Route path="/login" element={<RedirectIfAuthenticated><Login /></RedirectIfAuthenticated>} />
+          <Route path="/register" element={<RedirectIfAuthenticated><Register /></RedirectIfAuthenticated>} />
+          <Route path="/forgot-password" element={<RedirectIfAuthenticated><ForgotPassword /></RedirectIfAuthenticated>} />
+          <Route path="/update-password" element={<RedirectIfAuthenticated><UpdatePassword /></RedirectIfAuthenticated>} />
           <Route path="/auth/callback" element={<AuthCallback />} />
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            }
-          /> {/* TODO: Remove this route after testing */}
           <Route
             path="/profile"
             element={
@@ -54,7 +47,7 @@ const App: React.FC = () => {
               </ProtectedRoute>
             }
           />
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/" element={<RedirectIfAuthenticated><Home /></RedirectIfAuthenticated>} />
           <Route path="*" element={<DebugRoute />} />
         </Routes>
       </Router>
@@ -81,6 +74,18 @@ const DebugRoute = () => {
   );
 };
 
-import { useLocation } from 'react-router-dom';
+const RedirectIfAuthenticated: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { isAuthenticated, loading } = useAuth();
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (isAuthenticated) {
+    return <Navigate to="/scan" replace />;
+  }
+
+  return <>{children}</>;
+};
 
 export default App;

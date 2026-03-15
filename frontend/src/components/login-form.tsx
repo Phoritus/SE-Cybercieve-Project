@@ -4,13 +4,11 @@ import { Button } from '@/src/components/ui/button'
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
 } from '@/src/components/ui/card'
 import { Input } from '@/src/components/ui/input'
 import { Label } from '@/src/components/ui/label'
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 
 export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRef<'div'>) {
   const [email, setEmail] = useState('')
@@ -29,7 +27,7 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
         password,
       })
       if (error) throw error
-      location.href = "/dashboard"
+      location.href = "/scan"
 
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : 'An error occurred')
@@ -69,21 +67,18 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
   }
 
   return (
-    <div className={cn('flex flex-col gap-6', className)} {...props}>
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-2xl">Welcome Back</CardTitle>
-          <CardDescription>Enter your email below to login to your account</CardDescription>
-        </CardHeader>
-        <CardContent>
+    <div className={cn('flex flex-col gap-5', className)} {...props}>
+      <Card className="border-slate-800 bg-slate-900/30 py-0 shadow-none backdrop-blur-sm">
+        <CardContent className="p-6 sm:p-6">
           <form onSubmit={handleLogin}>
-            <div className="flex flex-col gap-6">
+            <div className="flex flex-col gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email" className="text-slate-100">Email</Label>
                 <Input
                   id="email"
                   type="email"
-                  placeholder="m@example.com"
+                  placeholder="Enter your email"
+                  className="h-10 border-slate-800 bg-slate-800/70 text-slate-100 placeholder:text-slate-500 focus-visible:border-blue-500 focus-visible:ring-blue-500/30"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -91,40 +86,56 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
               </div>
               <div className="grid gap-2">
                 <div className="flex items-center">
-                  <Label htmlFor="password">Password</Label>
-                  <a
-                    href="/forgot-password"
-                    className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
+                  <Label htmlFor="password" className="text-slate-100">Password</Label>
+                  <Link
+                    to="/forgot-password"
+                    className="ml-auto inline-block text-sm text-slate-300 transition-colors hover:text-white"
                   >
                     Forgot your password?
-                  </a>
+                  </Link>
                 </div>
                 <Input
                   id="password"
                   type="password"
+                  placeholder="Enter your password"
+                  className="h-10 border-slate-800 bg-slate-800/70 text-slate-100 placeholder:text-slate-500 focus-visible:border-blue-500 focus-visible:ring-blue-500/30"
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />
               </div>
-              {error && <p className="text-sm text-red-500">{error}</p>}
-              <Button type="submit" className="w-full" disabled={isLoading}>
+              {error && <p className="text-sm text-red-400">{error}</p>}
+              <Button
+                type="submit"
+                className="h-10 w-full bg-blue-500 text-white hover:bg-blue-400"
+                disabled={isLoading}
+              >
                 {isLoading ? 'Logging in...' : 'Login'}
               </Button>
             </div>
-            <div className="mt-4 flex flex-col gap-2">
-              <Button variant="outline" className="w-full" onClick={handleGoogleLogin} type="button">
+            <div className="mt-3.5 flex flex-col gap-2">
+              <Button
+                variant="outline"
+                className="h-10 w-full border-blue-500/60 bg-transparent text-slate-100 hover:bg-blue-500/10 hover:text-white"
+                onClick={handleGoogleLogin}
+                type="button"
+              >
                 Login with Google
               </Button>
-              <Button variant="outline" className="w-full" onClick={handleGithubLogin} type="button">
+              <Button
+                variant="outline"
+                className="h-10 w-full border-blue-500/60 bg-transparent text-slate-100 hover:bg-blue-500/10 hover:text-white"
+                onClick={handleGithubLogin}
+                type="button"
+              >
                 Login with GitHub
               </Button>
             </div>
-            <div className="mt-4 text-center text-sm">
+            <div className="mt-3.5 text-center text-sm text-slate-300">
               Don&apos;t have an account?{' '}
-              <a href="/register" className="underline underline-offset-4">
+              <Link to="/register" className="text-blue-400 transition-colors hover:text-blue-300">
                 Sign up
-              </a>
+              </Link>
             </div>
           </form>
         </CardContent>
