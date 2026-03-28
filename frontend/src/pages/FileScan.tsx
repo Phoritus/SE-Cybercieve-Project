@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { Upload, Search, FileBarChart, AlertCircle, CircleUserRound } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { FileUpload } from '@/src/components/FileUpload';
@@ -7,6 +7,7 @@ import waitingSvg from '@/src/assets/waiting.svg';
 import { ScanResult } from '@/src/components/ScanResult';
 import api from '@/src/api/axios';
 import { supabase } from '@/src/api/supabaseClient';
+import { useScanStatusSocket } from '@/src/hooks/useScanStatusSocket';
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -31,9 +32,7 @@ async function computeSHA256(file: File): Promise<string> {
   return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
 }
 
-function delay(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
+
 
 /* ------------------------------------------------------------------ */
 /*  Step indicator                                                     */
@@ -107,6 +106,29 @@ const FileScan: React.FC = () => {
   const [state, setState] = useState<ScanState>({ step: 'idle' });
   const [profile, setProfile] = useState({ name: 'User', handle: '@profile' });
 
+  // Ref to signal the polling loop to stop (e.g. when WS delivers result first)
+  const cancelledRef = useRef(false);
+
+  // ── Observer Pattern: subscribe to real-time scan updates via WebSocket ──
+  const activeHash =
+    state.step !== 'idle' && state.step !== 'error' && state.step !== 'complete'
+      ? state.fileHash
+      : null;
+  const { completedReport, completedHash } = useScanStatusSocket(activeHash);
+
+  // When the WebSocket pushes a completed event, instantly show the result
+  useEffect(() => {
+    if (completedReport && completedHash && state.step !== 'complete') {
+      cancelledRef.current = true; // stop the polling loop
+      setState({
+        step: 'complete',
+        fileName: 'fileName' in state ? state.fileName : 'Unknown',
+        fileHash: completedHash,
+        report: completedReport,
+      });
+    }
+  }, [completedReport, completedHash]);
+
   useEffect(() => {
     const loadProfile = async () => {
       const { data } = await supabase.auth.getUser();
@@ -116,7 +138,7 @@ const FileScan: React.FC = () => {
       const emailName = user.email?.split('@')[0] ?? 'user';
       const fullName = user.user_metadata?.full_name || user.user_metadata?.name;
       const safeName = (fullName || emailName)
-        .split(/[_\-.\s]+/)
+        .split(/[_\-.\\s]+/)
         .filter(Boolean)
         .map((w: string) => w.charAt(0).toUpperCase() + w.slice(1))
         .join(' ');
@@ -131,6 +153,16 @@ const FileScan: React.FC = () => {
   }, []);
 
   const handleFileScan = useCallback(async (file: File) => {
+    cancelledRef.current = false; // reset for new scan
+
+    if (file.size > 50 * 1024 * 1024) {
+      setState({
+        step: 'error',
+        message: 'File is too large. Maximum allowed size is 50 MB.',
+      });
+      return;
+    }
+
     try {
       // ── Compute SHA-256 client-side ──────────────────
       const fileHash = await computeSHA256(file);
@@ -172,7 +204,7 @@ const FileScan: React.FC = () => {
         return;
       }
 
-      // ── Step 2: Poll analysis until completed ────────
+      // ── Step 2: Wait for WebSocket to deliver the result ──
       setState({
         step: 'analyzing',
         fileName: file.name,
@@ -180,66 +212,8 @@ const FileScan: React.FC = () => {
         progress: 'Waiting for analysis to start…',
       });
 
-      const MAX_RETRIES = 60;
-      const POLL_INTERVAL = 10_000; // 10 seconds
-      let resolvedHash = '';
-
-      for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
-        await delay(POLL_INTERVAL);
-
-        setState((prev) =>
-          prev.step === 'analyzing'
-            ? {
-              ...prev,
-              progress: `Polling analysis… (attempt ${attempt}/${MAX_RETRIES})`,
-            }
-            : prev
-        );
-
-        try {
-          const analysisRes = await api.get(
-            `/files/vt-analysis/${analysisId}`, { params: { file_hash: fileHash } }
-          );
-          const data = analysisRes.data;
-          // Backend returns {status, sha256?, report?} — only proceed when completed
-          if (data?.status === 'completed' && data?.sha256) {
-            resolvedHash = data.sha256;
-            break;
-          }
-          // If queued or in-progress, continue polling
-        } catch {
-          // Silently retry — analysis may not be ready yet
-        }
-      }
-
-      if (!resolvedHash) {
-        setState({
-          step: 'error',
-          message:
-            'Analysis timed out. The file might still be processing — try again in a few minutes.',
-        });
-        return;
-      }
-
-      // ── Step 3: Use the report from analysis, or fetch by hash as fallback ─
-
-      setState({ step: 'fetching-report', fileName: file.name, fileHash: resolvedHash });
-
-      const reportRes = await api.get('/files/vt-report/', {
-        params: { file_hash: resolvedHash },
-      });
-
-      if (reportRes.data?.error) {
-        setState({ step: 'error', message: reportRes.data.error });
-        return;
-      }
-
-      setState({
-        step: 'complete',
-        fileName: file.name,
-        fileHash: resolvedHash,
-        report: reportRes.data,
-      });
+      // The useScanStatusSocket hook will automatically transition the state 
+      // to 'complete' when the scan_completed event arrives via WebSocket.
     } catch (err: any) {
       setState({
         step: 'error',

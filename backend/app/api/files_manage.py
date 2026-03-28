@@ -1,33 +1,42 @@
 from app.services.files_manage import VirusTotalService
+from app.services.websocket_manager import ConnectionManager
 from app.db.supabase import get_db
 
-from fastapi import UploadFile, File, APIRouter, Depends
+from fastapi import UploadFile, File, APIRouter, Depends, Query, HTTPException, status
 from sqlalchemy.orm import Session
 
 router = APIRouter()
+ws_manager = ConnectionManager()
+
 @router.post("/upload-to-vt")
 async def upload_file(file: UploadFile = File(...), db: Session = Depends(get_db)):
+    if file.size and file.size > 50 * 1024 * 1024:
+        raise HTTPException(status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE, detail="File is too large. Maximum allowed size is 50 MB.")
+    
     file_content = await file.read()
     return VirusTotalService(db).upload_file(file.filename, file_content, file.content_type)
 
 @router.get("/vt-analysis/{analysis_id}")
-def get_analysis_result(analysis_id: str, db: Session = Depends(get_db)):
-    return VirusTotalService(db).get_analysis_result(analysis_id)
+async def get_analysis_result(
+    analysis_id: str,
+    file_hash: str = Query(default=None),
+    db: Session = Depends(get_db),
+):
+    result = VirusTotalService(db).get_analysis_result(analysis_id, file_hash=file_hash)
+
+    # If scan completed and we have a report, broadcast to WebSocket observers
+    if result.get("status") == "completed" and result.get("report"):
+        resolved_hash = result.get("sha256", file_hash)
+        if resolved_hash:
+            await ws_manager.broadcast(resolved_hash, {
+                "event": "scan_completed",
+                "file_hash": resolved_hash,
+                "report": result["report"],
+            })
+
+    return result
 
 
 @router.get("/vt-report/")
 def get_report_by_hash(file_hash: str, db: Session = Depends(get_db)):
     return VirusTotalService(db).get_report_by_hash(file_hash)
-
-
-# if __name__ == "__main__":
-#     data = {
-#   "data": {
-#     "type": "analysis",
-#     "id": "OGJhODJlZWUxZDNiNjc3YTlkZDcwOTYwZTNkMTQxYTc6MTc3MTMzODIxNA==",
-#     "links": {
-#       "self": "https://www.virustotal.com/api/v3/analyses/OGJhODJlZWUxZDNiNjc3YTlkZDcwOTYwZTNkMTQxYTc6MTc3MTMzODIxNA=="
-#     }
-#   }
-# }
-#     # print(get_analysis_result(data["data"]["links"]["self"]))

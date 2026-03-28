@@ -4,12 +4,17 @@ import json
 from langchain_groq import ChatGroq
 
 class LLMService:
-    def __init__(self):
-        self.client = ChatGroq(
-            api_key=groq_config.GROQ_API_KEY,
-            model="openai/gpt-oss-120b",
-            temperature=0.5,
-        )
+    _instance = None
+
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super(LLMService, cls).__new__(cls)
+            cls._instance.client = ChatGroq(
+                api_key=groq_config.GROQ_API_KEY,
+                model="openai/gpt-oss-120b",
+                temperature=0.5,
+            )
+        return cls._instance
 
     def filter_json(self, json_data: dict) -> str:
         attributes = json_data.get("data", {}).get("attributes", {})
