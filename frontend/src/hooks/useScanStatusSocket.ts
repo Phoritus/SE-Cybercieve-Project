@@ -45,7 +45,7 @@ export function useScanStatusSocket(fileHash: string | null): ScanSocketState {
     setCompletedReport(null);
     setCompletedHash(null);
     // cybersieve-api.fly.dev or localhost:8000
-    const wsUrl = `ws://127.0.0.1:8000/api/ws/scans/${fileHash}`;
+    const wsUrl = `ws://cybersieve-api.fly.dev/api/ws/scans/${fileHash}`;
     const ws = new WebSocket(wsUrl);
     wsRef.current = ws;
 
