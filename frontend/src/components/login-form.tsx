@@ -7,12 +7,14 @@ import {
 } from '@/src/components/ui/card'
 import { Input } from '@/src/components/ui/input'
 import { Label } from '@/src/components/ui/label'
+import { Icon } from '@iconify/react'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 
 export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRef<'div'>) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
 
@@ -94,15 +96,25 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
                     Forgot your password?
                   </Link>
                 </div>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="Enter your password"
-                  className="h-10 border-slate-800 bg-slate-800/70 text-slate-100 placeholder:text-slate-500 focus-visible:border-blue-500 focus-visible:ring-blue-500/30"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="Enter your password"
+                    className="h-10 border-slate-800 bg-slate-800/70 pr-12 text-slate-100 placeholder:text-slate-500 focus-visible:border-blue-500 focus-visible:ring-blue-500/30"
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-1 text-[#FFFFFF80] transition-colors hover:text-white"
+                    aria-label={showPassword ? 'Hide value' : 'Show value'}
+                  >
+                    <Icon icon="iconoir:eye-solid" width={18} height={18} style={{ color: '#FFFFFF80' }} />
+                  </button>
+                </div>
               </div>
               {error && <p className="text-sm text-red-400">{error}</p>}
               <Button

@@ -64,7 +64,7 @@ describe('AuthCallback Component', () => {
       </MemoryRouter>
     );
 
-    expect(screen.getByText('Processing Login...')).toBeInTheDocument();
+    expect(screen.getByAltText('Loading')).toBeInTheDocument();
 
     await waitFor(() => {
       expect(api.post).toHaveBeenCalledWith('/register', expect.objectContaining({

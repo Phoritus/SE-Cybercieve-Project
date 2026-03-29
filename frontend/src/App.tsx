@@ -24,7 +24,7 @@ const App: React.FC = () => {
           <Route path="/login" element={<RedirectIfAuthenticated><Login /></RedirectIfAuthenticated>} />
           <Route path="/register" element={<RedirectIfAuthenticated><Register /></RedirectIfAuthenticated>} />
           <Route path="/forgot-password" element={<RedirectIfAuthenticated><ForgotPassword /></RedirectIfAuthenticated>} />
-          <Route path="/update-password" element={<RedirectIfAuthenticated><UpdatePassword /></RedirectIfAuthenticated>} />
+          <Route path="/update-password" element={<UpdatePassword />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
           <Route
             path="/profile"

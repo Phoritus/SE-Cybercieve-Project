@@ -102,8 +102,8 @@ class VirusTotalCacheProxy:
             return existing
 
         result = self.provider.get_report_by_hash(file_hash)
-        if result and not result.get("error") and self._has_valid_stats(result):
-            # Only cache reports that have real engine results (not incomplete/stale)
+        if result and not result.get("error"):
+            # Persist provider responses; stale/incomplete payloads are filtered on read.
             file_type = result.get("data", {}).get("attributes", {}).get("type_extension")
             self.save_analysis_result(file_hash=file_hash, analysis_result=result, file_type=file_type)
         return result

@@ -3,14 +3,36 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/src/context/AuthContext';
 import { supabase } from '@/src/api/supabaseClient';
 import api from '@/src/api/axios';
+import loadingScanSvg from '@/src/assets/loading_scan.svg';
+
+function getAuthFlowType(): string | null {
+  const searchParams = new URLSearchParams(window.location.search);
+  const searchType = searchParams.get('type');
+  if (searchType) return searchType;
+
+  // Supabase can also put auth params in URL hash for implicit flows.
+  const hash = window.location.hash.startsWith('#')
+    ? window.location.hash.slice(1)
+    : window.location.hash;
+  const hashParams = new URLSearchParams(hash);
+  return hashParams.get('type');
+}
 
 const AuthCallback: React.FC = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
   useEffect(() => {
+    const flowType = getAuthFlowType();
+
     // Check for existing session or listen for auth state change
     const syncUser = async (session: any) => {
       if (session) {
+        if (flowType === 'recovery') {
+          login(session.access_token);
+          navigate('/update-password', { replace: true });
+          return;
+        }
+
         const { user } = session;
         const { email, user_metadata } = user;
         const fullName = user_metadata.full_name || user_metadata.name || "";
@@ -27,6 +49,14 @@ const AuthCallback: React.FC = () => {
           });
         } catch (error) {
           console.log("User sync error (likely already exists):", error);
+        }
+
+        // Email confirmation links (`type=signup`) may create a temporary
+        // session automatically. We confirm account, then send user to login.
+        if (flowType === 'signup') {
+          await supabase.auth.signOut();
+          navigate('/login', { replace: true });
+          return;
         }
 
         login(session.access_token);
@@ -46,10 +76,14 @@ const AuthCallback: React.FC = () => {
   }, [navigate, login]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+    <div className="min-h-screen bg-slate-950 text-slate-200 flex items-center justify-center">
       <div className="text-center">
-        <h2 className="text-2xl font-bold mb-4">Processing Login...</h2>
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+        <img
+          src={loadingScanSvg}
+          alt="Loading"
+          className="w-14 h-14 mx-auto"
+        />
+        <p className="mt-4 text-sm text-slate-400">Signing you in...</p>
       </div>
     </div>
   );
