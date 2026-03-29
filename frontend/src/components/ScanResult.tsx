@@ -1,14 +1,10 @@
 import {
-  ShieldCheck,
-  ShieldX,
-  ShieldQuestion,
   FileText,
   Hash,
   HardDrive,
   FileType,
   ChevronDown,
   ChevronUp,
-  RotateCcw,
 } from 'lucide-react';
 import { useState, useMemo } from 'react';
 
@@ -40,55 +36,11 @@ interface ScanResultProps {
   report: any;
   fileName: string;
   fileHash: string;
-  onScanAnother: () => void;
 }
 
 /* ------------------------------------------------------------------ */
 /*  Helpers                                                            */
 /* ------------------------------------------------------------------ */
-
-function getThreatInfo(stats: AnalysisStats) {
-  // Only count engines that actually scanned (exclude type-unsupported, timeout, failure)
-  const total = stats.malicious + stats.suspicious + stats.undetected + stats.harmless;
-
-  const detections = stats.malicious + stats.suspicious;
-
-  if (detections === 0)
-    return {
-      level: 'clean' as const,
-      label: 'No threats detected',
-      color: 'text-emerald-400',
-      bg: 'bg-emerald-500/10',
-      border: 'border-emerald-500/30',
-      ring: 'ring-emerald-500/20',
-      icon: ShieldCheck,
-      detections,
-      total,
-    };
-  if (detections <= 5)
-    return {
-      level: 'low' as const,
-      label: 'Low risk',
-      color: 'text-yellow-400',
-      bg: 'bg-yellow-500/10',
-      border: 'border-yellow-500/30',
-      ring: 'ring-yellow-500/20',
-      icon: ShieldQuestion,
-      detections,
-      total,
-    };
-  return {
-    level: 'high' as const,
-    label: 'Malicious',
-    color: 'text-red-400',
-    bg: 'bg-red-500/10',
-    border: 'border-red-500/30',
-    ring: 'ring-red-500/20',
-    icon: ShieldX,
-    detections,
-    total,
-  };
-}
 
 function formatBytes(bytes: number): string {
   if (bytes === 0) return '0 B';
@@ -133,7 +85,7 @@ function categoryBadge(category: string): string {
 /*  Component                                                          */
 /* ------------------------------------------------------------------ */
 
-export function ScanResult({ report, fileName, fileHash, onScanAnother }: ScanResultProps) {
+export function ScanResult({ report, fileName, fileHash }: ScanResultProps) {
   const [showAllEngines, setShowAllEngines] = useState(false);
   const [filterDetected, setFilterDetected] = useState(false);
 
@@ -151,8 +103,6 @@ export function ScanResult({ report, fileName, fileHash, onScanAnother }: ScanRe
   };
 
   const results: Record<string, EngineResult> = attrs.last_analysis_results ?? {};
-  const threat = getThreatInfo(stats);
-  const ThreatIcon = threat.icon;
 
   // Sort engines: detected first, then alphabetical
   const sortedEngines = useMemo(() => {
@@ -185,31 +135,6 @@ export function ScanResult({ report, fileName, fileHash, onScanAnother }: ScanRe
 
   return (
     <div className="w-full max-w-5xl mx-auto space-y-6 animate-in fade-in duration-500">
-      {/* ── Threat Header ─────────────────────────────────── */}
-      <div
-        className={`flex items-center gap-6 p-6 rounded-xl border ${threat.border} ${threat.bg} ring-1 ${threat.ring}`}
-      >
-        <div className="shrink-0">
-          <ThreatIcon className={`w-16 h-16 ${threat.color}`} strokeWidth={1.5} />
-        </div>
-        <div className="flex-1 min-w-0">
-          <h2 className={`text-2xl font-bold ${threat.color}`}>
-            {threat.detections}/{threat.total}
-            <span className="text-base font-normal text-slate-400 ml-2">
-              security vendors flagged this file
-            </span>
-          </h2>
-          <p className={`text-sm font-semibold mt-1 ${threat.color}`}>{threat.label}</p>
-        </div>
-        <button
-          onClick={onScanAnother}
-          className="flex items-center gap-2 px-4 py-2 text-sm text-slate-400 border border-slate-700 rounded-lg hover:text-white hover:border-slate-500 transition-colors"
-        >
-          <RotateCcw className="w-4 h-4" />
-          Scan another
-        </button>
-      </div>
-
       {/* ── File Info ─────────────────────────────────────── */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <InfoCard

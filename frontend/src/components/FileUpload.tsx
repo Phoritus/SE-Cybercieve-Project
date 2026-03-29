@@ -69,11 +69,11 @@ export function FileUpload({ onFileSelect }: FileUploadProps) {
       <div className="max-w-3xl text-center space-y-2">
         <p className="text-slate-400/60 text-xs leading-relaxed">
           By submitting data above, you are agreeing to our{' '}
-          <a href="#" className="text-blue-400/80 hover:text-blue-400">Terms of Service</a> and{' '}
-          <a href="#" className="text-blue-400/80 hover:text-blue-400">Privacy Notice</a>, and to the{' '}
+          <a href="https://cloud.google.com/terms" target="_blank" rel="noopener noreferrer" className="text-blue-400/80 hover:text-blue-400">Terms of Service</a> and{' '}
+          <a href="https://cloud.google.com/terms/secops/privacy-notice" target="_blank" rel="noopener noreferrer" className="text-blue-400/80 hover:text-blue-400">Privacy Notice</a>, and to the{' '}
           <strong className="text-slate-300">sharing of your Sample submission with the security community</strong>.
           Please do not submit any personal information; we are not responsible for the contents of your submission.{' '}
-          <a href="#" className="text-blue-400/80 hover:text-blue-400">Learn more</a>.
+          <a href="https://docs.virustotal.com/docs/how-it-works" target="_blank" rel="noopener noreferrer" className="text-blue-400/80 hover:text-blue-400">Learn more</a>.
         </p>
       </div>
 

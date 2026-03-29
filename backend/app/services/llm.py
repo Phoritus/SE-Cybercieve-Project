@@ -8,16 +8,25 @@ class LLMService:
 
     def __new__(cls):
         if cls._instance is None:
-            cls._instance = super(LLMService, cls).__new__(cls)
-            cls._instance.client = ChatGroq(
-                api_key=groq_config.GROQ_API_KEY,
-                model="openai/gpt-oss-120b",
-                temperature=0.5,
-            )
+            instance = super(LLMService, cls).__new__(cls)
+            try:
+                instance.client = ChatGroq(
+                    api_key=groq_config.GROQ_API_KEY,
+                    model="openai/gpt-oss-120b",
+                    temperature=0.5,
+                )
+            except Exception as e:
+                raise RuntimeError(f"Failed to initialize LLM client: {e}")
+            cls._instance = instance
         return cls._instance
 
     def filter_json(self, json_data: dict) -> str:
+        # Handle both {data: {attributes: ...}} and {attributes: ...} structures
         attributes = json_data.get("data", {}).get("attributes", {})
+        if not attributes:
+            attributes = json_data.get("attributes", {})
+        if not attributes:
+            attributes = json_data
 
         # 2. File Info
         name = attributes.get("meaningful_name", "Unknown")
@@ -97,7 +106,7 @@ class LLMService:
 
         prompt = f"""
 Act as a Cybersecurity Analyst.
-Based on the provided JSON data, generate **ONLY** a concise 'Initial Guidance & Remediation' section.
+Based on the provided JSON data.
 **STRICT RULES:**
 1. **Formatting:** Use bullet points. Keep each point short and actionable (no long paragraphs).
 2. **Style:** Each point must start with a relevant emoji (e.g., 🛑, 🔍, ⚠️, 🗑️, ✅).

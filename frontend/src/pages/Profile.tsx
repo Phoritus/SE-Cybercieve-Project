@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '@/src/api/axios';
 import { CircleUserRound, Save } from 'lucide-react';
+import LoadingSpinner from '@/src/components/LoadingSpinner';
 
 const Profile: React.FC = () => {
   const navigate = useNavigate();
@@ -89,6 +90,7 @@ const Profile: React.FC = () => {
         last_name: formData.last_name || null
       });
       setSuccess('Profile updated successfully!');
+      setTimeout(() => setSuccess(''), 4000);
     } catch (err: any) {
       console.error('Failed to update profile', err);
       setError(err.response?.data?.detail || 'Failed to update profile');
@@ -96,11 +98,7 @@ const Profile: React.FC = () => {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-slate-950 text-slate-200 flex items-center justify-center">
-        <p className="text-slate-400">Loading profile...</p>
-      </div>
-    );
+    return <LoadingSpinner />;
   }
 
   return (

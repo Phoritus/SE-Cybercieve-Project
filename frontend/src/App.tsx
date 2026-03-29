@@ -10,8 +10,11 @@ import UpdatePassword from './pages/UpdatePassword';
 import AuthCallback from './pages/AuthCallback';
 import Profile from './pages/Profile';
 import FileScan from './pages/FileScan';
-import Recommendation from './pages/Recommendation';
+import ScanReport from './pages/ScanReport';
+import ScanDetails from './pages/ScanDetails';
+import Statistics from './pages/Statistics';
 import ProtectedRoute from './components/ProtectedRoute';
+import LoadingSpinner from './components/LoadingSpinner';
 
 const App: React.FC = () => {
   return (
@@ -40,10 +43,26 @@ const App: React.FC = () => {
             }
           />
           <Route
-            path="/recommendation"
+            path="/scan-report"
             element={
               <ProtectedRoute>
-                <Recommendation />
+                <ScanReport />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/scan-details"
+            element={
+              <ProtectedRoute>
+                <ScanDetails />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/statistics"
+            element={
+              <ProtectedRoute>
+                <Statistics />
               </ProtectedRoute>
             }
           />
@@ -78,7 +97,7 @@ const RedirectIfAuthenticated: React.FC<{ children: React.ReactNode }> = ({ chil
   const { isAuthenticated, loading } = useAuth();
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <LoadingSpinner />;
   }
 
   if (isAuthenticated) {
