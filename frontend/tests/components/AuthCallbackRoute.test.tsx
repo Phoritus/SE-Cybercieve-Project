@@ -72,7 +72,7 @@ describe('AuthCallback Component', () => {
         first_name: 'Test',
         last_name: 'User',
       }));
-      expect(mockedNavigate).toHaveBeenCalledWith('/dashboard');
+      expect(mockedNavigate).toHaveBeenCalledWith('/scan');
     });
   });
 });

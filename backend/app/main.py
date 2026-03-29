@@ -1,7 +1,6 @@
 from app.api.users import router as users_router
 from app.api.files_manage import router as files_router
 from app.api.recommend import router as recommend_router
-from app.api.ws import router as ws_router
 from app.api.statistics import router as stats_router
 
 from fastapi import FastAPI
@@ -33,7 +32,6 @@ def read_root():
 app.include_router(users_router, prefix="/api", tags=["users"])
 app.include_router(files_router, prefix="/api/files", tags=["files"])
 app.include_router(recommend_router, prefix="/api/recommend", tags=["recommendation"])
-app.include_router(ws_router, prefix="/api/ws", tags=["websocket"])
 app.include_router(stats_router, prefix="/api/files", tags=["statistics"])
 
 if __name__ == "__main__":

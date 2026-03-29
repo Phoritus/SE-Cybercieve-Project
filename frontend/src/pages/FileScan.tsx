@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Upload, Search, FileBarChart, AlertCircle } from 'lucide-react';
 import { AuthenticatedNavbar } from '@/src/components/navbar';
@@ -7,7 +7,6 @@ import loadingScanSvg from '@/src/assets/loading_scan.svg';
 import waitingSvg from '@/src/assets/waiting.svg';
 
 import api from '@/src/api/axios';
-import { useScanStatusSocket } from '@/src/hooks/useScanStatusSocket';
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -30,6 +29,10 @@ async function computeSHA256(file: File): Promise<string> {
   const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
   const hashArray = Array.from(new Uint8Array(hashBuffer));
   return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+}
+
+function delay(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 
@@ -106,29 +109,6 @@ const FileScan: React.FC = () => {
   const [state, setState] = useState<ScanState>({ step: 'idle' });
   const navigate = useNavigate();
 
-  // Ref to signal the polling loop to stop (e.g. when WS delivers result first)
-  const cancelledRef = useRef(false);
-
-  // ── Observer Pattern: subscribe to real-time scan updates via WebSocket ──
-  const activeHash =
-    state.step !== 'idle' && state.step !== 'error' && state.step !== 'complete'
-      ? state.fileHash
-      : null;
-  const { completedReport, completedHash } = useScanStatusSocket(activeHash);
-
-  // When the WebSocket pushes a completed event, instantly show the result
-  useEffect(() => {
-    if (completedReport && completedHash && state.step !== 'complete') {
-      cancelledRef.current = true; // stop the polling loop
-      setState({
-        step: 'complete',
-        fileName: 'fileName' in state ? state.fileName : 'Unknown',
-        fileHash: completedHash,
-        report: completedReport,
-      });
-    }
-  }, [completedReport, completedHash]);
-
   // Navigate to the merged report page when scan finishes
   useEffect(() => {
     if (state.step === 'complete') {
@@ -144,8 +124,6 @@ const FileScan: React.FC = () => {
   }, [state.step, navigate]);
 
   const handleFileScan = useCallback(async (file: File) => {
-    cancelledRef.current = false; // reset for new scan
-
     if (file.size > 50 * 1024 * 1024) {
       setState({
         step: 'error',
@@ -195,7 +173,7 @@ const FileScan: React.FC = () => {
         return;
       }
 
-      // ── Step 2: Wait for WebSocket to deliver the result ──
+      // ── Step 2: Poll analysis until completed ────────
       setState({
         step: 'analyzing',
         fileName: file.name,
@@ -203,8 +181,61 @@ const FileScan: React.FC = () => {
         progress: 'Waiting for analysis to start…',
       });
 
-      // The useScanStatusSocket hook will automatically transition the state 
-      // to 'complete' when the scan_completed event arrives via WebSocket.
+      const MAX_RETRIES = 60;
+      const POLL_INTERVAL = 10_000;
+      let completedReport: any | null = null;
+      let resolvedHash = fileHash;
+
+      for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+        await delay(POLL_INTERVAL);
+
+        setState((prev) =>
+          prev.step === 'analyzing'
+            ? {
+              ...prev,
+              progress: `Polling analysis… (attempt ${attempt}/${MAX_RETRIES})`,
+            }
+            : prev
+        );
+
+        try {
+          const analysisRes = await api.get(`/files/vt-analysis/${analysisId}`, {
+            params: { file_hash: fileHash },
+          });
+          const analysisData = analysisRes.data;
+          if (analysisData?.status === 'completed') {
+            resolvedHash = analysisData?.sha256 ?? fileHash;
+            completedReport = analysisData?.report ?? null;
+            break;
+          }
+        } catch {
+          // Keep retrying until max attempts.
+        }
+      }
+
+      if (!completedReport) {
+        setState({ step: 'fetching-report', fileName: file.name, fileHash: resolvedHash });
+        const reportRes = await api.get('/files/vt-report/', {
+          params: { file_hash: resolvedHash },
+        });
+
+        if (reportRes.data?.error) {
+          setState({
+            step: 'error',
+            message: reportRes.data.error,
+          });
+          return;
+        }
+
+        completedReport = reportRes.data;
+      }
+
+      setState({
+        step: 'complete',
+        fileName: file.name,
+        fileHash: resolvedHash,
+        report: completedReport,
+      });
     } catch (err: any) {
       setState({
         step: 'error',

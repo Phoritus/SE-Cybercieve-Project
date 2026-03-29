@@ -116,9 +116,9 @@ const ScanReport: React.FC = () => {
         if (abortController.signal.aborted) return;
         setRecError(
           err?.response?.data?.detail ??
-            err?.response?.data?.error ??
-            err?.message ??
-            'Failed to generate recommendation.'
+          err?.response?.data?.error ??
+          err?.message ??
+          'Failed to generate recommendation.'
         );
       } finally {
         if (!abortController.signal.aborted) setRecLoading(false);
@@ -173,13 +173,13 @@ const ScanReport: React.FC = () => {
   const suspiciousCapabilities =
     tags.length > 0
       ? tags
-          .filter(
-            (t: string) =>
-              t.includes('suspicious') ||
-              t.includes('packer') ||
-              t.includes('obfuscated')
-          )
-          .join(', ') || 'None detected'
+        .filter(
+          (t: string) =>
+            t.includes('suspicious') ||
+            t.includes('packer') ||
+            t.includes('obfuscated')
+        )
+        .join(', ') || 'None detected'
       : 'None detected';
 
 

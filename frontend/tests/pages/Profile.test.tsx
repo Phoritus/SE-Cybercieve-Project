@@ -24,6 +24,7 @@ describe('Profile Page' , ()=>{
 
     beforeEach(()=>{
         vi.clearAllMocks();
+        vi.spyOn(console, 'error').mockImplementation(() => {});
 
     });
 
@@ -34,7 +35,7 @@ describe('Profile Page' , ()=>{
         render(<Profile/>)
 
         // Initially, "Loading" text should be present
-        expect(screen.getByText(/Loading/i)).toBeInTheDocument();
+        expect(screen.getByAltText(/Loading/i)).toBeInTheDocument();
 
         
         await waitFor(() => {
@@ -47,7 +48,7 @@ describe('Profile Page' , ()=>{
 
 
     it('2. Should display an error message when profile data fails to load',async()=>{
-        (api.get as any).mockResolvedValueOnce(new Error('Network Error'));
+        (api.get as any).mockRejectedValueOnce(new Error('Network Error'));
 
         render(<Profile/>)
 
@@ -88,7 +89,7 @@ describe('Profile Page' , ()=>{
         });
     });
 
-    it('4. Should navigate back to Dashboard when Cancel button is clicked' , async ()=>{
+    it('4. Should navigate back to scan when Cancel button is clicked' , async ()=>{
         (api.get as any).mockResolvedValueOnce({
             data:{  email:'john@test.com',username:'test123',first_name:'John',last_name:'Doe'}
         });
@@ -102,6 +103,6 @@ describe('Profile Page' , ()=>{
         const cancelButton = screen.getByRole('button',{name:/Cancel/i});
         fireEvent.click(cancelButton);
 
-        expect(mockNevigate).toHaveBeenCalledWith('/dashboard');
+        expect(mockNevigate).toHaveBeenCalledWith('/scan');
     });
 });//describe
