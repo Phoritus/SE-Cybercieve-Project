@@ -84,11 +84,22 @@ const Profile: React.FC = () => {
     setError('');
     setSuccess('');
     try {
-      await api.put('/me', {
+      const response = await api.put('/me', {
         username: formData.username || null,
         first_name: formData.first_name,
         last_name: formData.last_name || null
       });
+
+      const updated = response.data || {};
+      setFormData((prev) => ({
+        ...prev,
+        username: updated.username ?? prev.username,
+        first_name: updated.first_name ?? prev.first_name,
+        last_name: updated.last_name ?? prev.last_name,
+        email: updated.email ?? prev.email,
+      }));
+
+      window.dispatchEvent(new Event('profile-updated'));
       setSuccess('Profile updated successfully!');
       setTimeout(() => setSuccess(''), 4000);
     } catch (err: any) {

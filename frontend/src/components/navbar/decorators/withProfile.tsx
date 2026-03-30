@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { CircleUserRound, Settings, LogOut } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '@/src/api/supabaseClient';
+import api from '@/src/api/axios';
 import type { BaseNavbarProps } from '../BaseNavbar';
 
 export const withProfile = <P extends BaseNavbarProps>(
@@ -14,7 +15,30 @@ export const withProfile = <P extends BaseNavbarProps>(
     const navigate = useNavigate();
 
     useEffect(() => {
+      let isMounted = true;
+
+      const updateProfileState = (name: string, handleBase: string) => {
+        if (!isMounted) return;
+        const normalizedHandle = (handleBase || 'profile').toString().trim().replace(/\s+/g, '_');
+        setProfile({
+          name: name || 'User',
+          handle: `@${normalizedHandle}`,
+        });
+      };
+
       const loadProfile = async () => {
+        try {
+          const response = await api.get('/me');
+          const user = response.data || {};
+          const emailName = user.email?.split('@')[0] ?? 'user';
+          const fullName = [user.first_name, user.last_name].filter(Boolean).join(' ').trim();
+          const displayName = fullName || user.username || emailName;
+          updateProfileState(displayName, user.username || emailName);
+          return;
+        } catch {
+          // Fall back to Supabase metadata when backend user data is unavailable.
+        }
+
         const { data } = await supabase.auth.getUser();
         const user = data.user;
         if (!user) return;
@@ -27,12 +51,22 @@ export const withProfile = <P extends BaseNavbarProps>(
           .map((w: string) => w.charAt(0).toUpperCase() + w.slice(1))
           .join(' ');
 
-        setProfile({
-          name: safeName || 'User',
-          handle: `@${(user.user_metadata?.user_name || emailName).replace(/\s+/g, '_')}`,
-        });
+        updateProfileState(safeName || 'User', user.user_metadata?.user_name || emailName);
       };
-      loadProfile();
+
+      const refreshProfile = () => {
+        void loadProfile();
+      };
+
+      void loadProfile();
+      window.addEventListener('profile-updated', refreshProfile);
+      window.addEventListener('focus', refreshProfile);
+
+      return () => {
+        isMounted = false;
+        window.removeEventListener('profile-updated', refreshProfile);
+        window.removeEventListener('focus', refreshProfile);
+      };
     }, []);
 
     // Close dropdown when clicking outside
