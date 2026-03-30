@@ -128,9 +128,3 @@ Based on the provided JSON data.
 
         response = self.client.invoke(messages)
         return response.content.strip()
-
-# if __name__ == "__main__":
-#   llm_service = LLMService()
-#   null = None
-#   sample_json =
-#   print(llm_service.get_response(sample_json))

@@ -138,21 +138,7 @@ class VirusTotalService:
             return {"cached": True, "file_hash": file_hash, "analysis_result": vt_existing}
 
         # Not in DB — upload to VirusTotal.
-        # VT docs: use /files/upload_url for payloads larger than 32MB.
-        if len(file_content) > 32 * 1024 * 1024:
-            upload_url_resp = requests.get(f"{self.base_url}/files/upload_url", headers=self.headers)
-            if upload_url_resp.status_code != 200:
-                return {
-                    "error": (
-                        "Failed to retrieve upload URL: "
-                        f"{upload_url_resp.status_code} - {upload_url_resp.text}"
-                    )
-                }
-            url = upload_url_resp.json().get("data")
-            if not url:
-                return {"error": "Failed to retrieve upload URL: malformed response."}
-        else:
-            url = f"{self.base_url}/files"
+        url = f"{self.base_url}/files"
 
         files = {"file": (filename, file_content, content_type)}
 
