@@ -4,13 +4,43 @@ import api from '@/src/api/axios';
 import { CircleUserRound, Save } from 'lucide-react';
 import LoadingSpinner from '@/src/components/LoadingSpinner';
 
+type ProfileFormData = {
+  username: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+};
+
+const normalizeValue = (value: string) => value.trim();
+const PROFILE_CACHE_KEY = 'cybersieve_profile_cache';
+
+const persistAndBroadcastProfile = (profile: ProfileFormData) => {
+  try {
+    window.localStorage.setItem(PROFILE_CACHE_KEY, JSON.stringify(profile));
+  } catch {
+    // Ignore storage failures.
+  }
+
+  window.dispatchEvent(
+    new CustomEvent('profile-updated', {
+      detail: profile,
+    })
+  );
+};
+
 const Profile: React.FC = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<ProfileFormData>({
+    username: '',
+    first_name: '',
+    last_name: '',
+    email: ''
+  });
+  const [initialFormData, setInitialFormData] = useState<ProfileFormData>({
     username: '',
     first_name: '',
     last_name: '',
@@ -54,12 +84,15 @@ const Profile: React.FC = () => {
         // If I update /me in backend, I should do that.
 
         // Let's stick to the plan. I'll write this file, then I might need to update backend /me.
-        setFormData({
+        const loadedFormData: ProfileFormData = {
           username: response.data.username || '',
           first_name: response.data.first_name || '',
           last_name: response.data.last_name || '',
           email: response.data.email || ''
-        });
+        };
+        setFormData(loadedFormData);
+        setInitialFormData(loadedFormData);
+        persistAndBroadcastProfile(loadedFormData);
         setLoading(false);
       } catch (err) {
         console.error('Failed to fetch profile', err);
@@ -83,23 +116,45 @@ const Profile: React.FC = () => {
     e.preventDefault();
     setError('');
     setSuccess('');
+
+    const payload = {
+      username: normalizeValue(formData.username) || null,
+      first_name: normalizeValue(formData.first_name),
+      last_name: normalizeValue(formData.last_name) || null,
+    };
+
+    const initialPayload = {
+      username: normalizeValue(initialFormData.username) || null,
+      first_name: normalizeValue(initialFormData.first_name),
+      last_name: normalizeValue(initialFormData.last_name) || null,
+    };
+
+    const hasChanges =
+      payload.username !== initialPayload.username ||
+      payload.first_name !== initialPayload.first_name ||
+      payload.last_name !== initialPayload.last_name;
+
+    if (!hasChanges) {
+      setSuccess('No profile changes to save.');
+      setTimeout(() => setSuccess(''), 3000);
+      return;
+    }
+
     try {
-      const response = await api.put('/me', {
-        username: formData.username || null,
-        first_name: formData.first_name,
-        last_name: formData.last_name || null
-      });
+      const response = await api.put('/me', payload);
 
       const updated = response.data || {};
-      setFormData((prev) => ({
-        ...prev,
-        username: updated.username ?? prev.username,
-        first_name: updated.first_name ?? prev.first_name,
-        last_name: updated.last_name ?? prev.last_name,
-        email: updated.email ?? prev.email,
-      }));
+      const updatedFormData: ProfileFormData = {
+        username: (updated.username ?? payload.username ?? '').toString(),
+        first_name: (updated.first_name ?? payload.first_name ?? '').toString(),
+        last_name: (updated.last_name ?? payload.last_name ?? '').toString(),
+        email: (updated.email ?? formData.email ?? '').toString(),
+      };
 
-      window.dispatchEvent(new Event('profile-updated'));
+      setFormData(updatedFormData);
+      setInitialFormData(updatedFormData);
+
+      persistAndBroadcastProfile(updatedFormData);
       setSuccess('Profile updated successfully!');
       setTimeout(() => setSuccess(''), 4000);
     } catch (err: any) {

@@ -9,9 +9,10 @@ import { Input } from '@/src/components/ui/input'
 import { Label } from '@/src/components/ui/label'
 import { Icon } from '@iconify/react'
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
 export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRef<'div'>) {
+  const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -29,7 +30,7 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
         password,
       })
       if (error) throw error
-      location.href = "/scan"
+      navigate('/scan', { replace: true })
 
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : 'An error occurred')

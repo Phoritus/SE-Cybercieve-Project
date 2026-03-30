@@ -5,6 +5,41 @@ import { supabase } from '@/src/api/supabaseClient';
 import api from '@/src/api/axios';
 import type { BaseNavbarProps } from '../BaseNavbar';
 
+type ProfileUpdatedDetail = {
+  username?: string | null;
+  first_name?: string | null;
+  last_name?: string | null;
+  email?: string | null;
+};
+
+const PROFILE_CACHE_KEY = 'cybersieve_profile_cache';
+
+const readCachedProfile = (): ProfileUpdatedDetail | null => {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = window.localStorage.getItem(PROFILE_CACHE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== 'object') return null;
+    return parsed as ProfileUpdatedDetail;
+  } catch {
+    return null;
+  }
+};
+
+const writeCachedProfile = (profile: ProfileUpdatedDetail) => {
+  if (typeof window === 'undefined') return;
+  try {
+    window.localStorage.setItem(PROFILE_CACHE_KEY, JSON.stringify(profile));
+  } catch {
+    // Ignore storage failures.
+  }
+};
+
+const toSafeString = (value: unknown): string => {
+  return typeof value === 'string' ? value : '';
+};
+
 export const withProfile = <P extends BaseNavbarProps>(
   WrappedComponent: React.ComponentType<P>
 ) => {
@@ -26,46 +61,55 @@ export const withProfile = <P extends BaseNavbarProps>(
         });
       };
 
+      const applyProfileDetail = (detail?: ProfileUpdatedDetail | null) => {
+        if (!detail) return false;
+
+        const email = toSafeString(detail.email);
+        const username = toSafeString(detail.username);
+        const firstName = toSafeString(detail.first_name);
+        const lastName = toSafeString(detail.last_name);
+
+        const emailName = email.includes('@') ? email.split('@')[0] : email || 'user';
+        const fullName = [firstName, lastName].filter(Boolean).join(' ').trim();
+        const displayName = fullName || username || emailName;
+        updateProfileState(displayName, username || emailName);
+        return true;
+      };
+
       const loadProfile = async () => {
         try {
           const response = await api.get('/me');
-          const user = response.data || {};
-          const emailName = user.email?.split('@')[0] ?? 'user';
-          const fullName = [user.first_name, user.last_name].filter(Boolean).join(' ').trim();
-          const displayName = fullName || user.username || emailName;
-          updateProfileState(displayName, user.username || emailName);
-          return;
+          const dbUser = response.data || {};
+          const detail: ProfileUpdatedDetail = {
+            username: dbUser.username ?? null,
+            first_name: dbUser.first_name ?? null,
+            last_name: dbUser.last_name ?? null,
+            email: dbUser.email ?? null,
+          };
+          writeCachedProfile(detail);
+          applyProfileDetail(detail);
         } catch {
-          // Fall back to Supabase metadata when backend user data is unavailable.
+          // Keep the default profile UI if DB profile cannot be loaded.
         }
-
-        const { data } = await supabase.auth.getUser();
-        const user = data.user;
-        if (!user) return;
-
-        const emailName = user.email?.split('@')[0] ?? 'user';
-        const fullName = user.user_metadata?.full_name || user.user_metadata?.name;
-        const safeName = (fullName || emailName)
-          .split(/[_\-.\s]+/)
-          .filter(Boolean)
-          .map((w: string) => w.charAt(0).toUpperCase() + w.slice(1))
-          .join(' ');
-
-        updateProfileState(safeName || 'User', user.user_metadata?.user_name || emailName);
       };
 
-      const refreshProfile = () => {
+      const refreshProfile = (event: Event) => {
+        const detail = (event as CustomEvent<ProfileUpdatedDetail>).detail;
+        if (!detail) return;
+        writeCachedProfile(detail);
+        applyProfileDetail(detail);
+      };
+
+      const cachedProfile = readCachedProfile();
+      if (!applyProfileDetail(cachedProfile)) {
         void loadProfile();
-      };
+      }
 
-      void loadProfile();
-      window.addEventListener('profile-updated', refreshProfile);
-      window.addEventListener('focus', refreshProfile);
+      window.addEventListener('profile-updated', refreshProfile as EventListener);
 
       return () => {
         isMounted = false;
-        window.removeEventListener('profile-updated', refreshProfile);
-        window.removeEventListener('focus', refreshProfile);
+        window.removeEventListener('profile-updated', refreshProfile as EventListener);
       };
     }, []);
 
@@ -82,6 +126,11 @@ export const withProfile = <P extends BaseNavbarProps>(
 
     const handleSignOut = async () => {
       await supabase.auth.signOut();
+      try {
+        window.localStorage.removeItem(PROFILE_CACHE_KEY);
+      } catch {
+        // Ignore storage failures.
+      }
       navigate('/');
     };
 
