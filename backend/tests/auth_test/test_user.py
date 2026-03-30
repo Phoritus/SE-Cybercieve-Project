@@ -81,6 +81,24 @@ def test_update_user_with_uuid_object(user_service: Userservices):
     updated_user = user_service.update_user(UUID(user_id), user_update)
     assert updated_user.username == "test_uuid_updated"
 
+
+def test_update_user_can_clear_last_name(user_service: Userservices):
+    user_id = str(uuid4())
+    user = UserRegister(
+        username="clear_last_name",
+        first_name="first",
+        last_name="to_remove",
+        email="clear_last_name@test.com",
+        id=user_id,
+    )
+    user_service.create_user(user)
+
+    user_update = UserUpdate(last_name=None)
+    updated_user = user_service.update_user(user_id, user_update)
+
+    assert updated_user is not None
+    assert updated_user.last_name is None
+
 def test_update_user_with_duplicate_username(user_service: Userservices):
     # Create and add user
     user_id = str(uuid4())

@@ -74,13 +74,14 @@ class Userservices:
                 # Fallback/Error or try vars()?
                 user_update = vars(user_update)
 
-        if user_update.get("username") is not None:
+        # Apply explicit updates, including `None`, so nullable fields can be cleared.
+        if "username" in user_update:
             db_user.username = user_update["username"]
-        if user_update.get("first_name") is not None:
+        if "first_name" in user_update:
             db_user.first_name = user_update["first_name"]
-        if user_update.get("last_name") is not None:
+        if "last_name" in user_update:
             db_user.last_name = user_update["last_name"]
-        if user_update.get("email") is not None:
+        if "email" in user_update:
             db_user.email = user_update["email"]
             
         try:
