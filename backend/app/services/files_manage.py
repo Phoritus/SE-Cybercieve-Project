@@ -1,7 +1,6 @@
 import hashlib
 import json
 from typing import Protocol
-
 import requests
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
@@ -26,7 +25,6 @@ class VirusTotalApiClient:
     def get_report_by_hash(self, file_hash: str) -> dict:
         url = f"{self.base_url}/files/{file_hash}"
         response = requests.get(url, headers=self.headers)
-
         if response.status_code == 200:
             return response.json()
         return {"error": f"Failed to retrieve report: {response.status_code} - {response.text}"}
@@ -34,7 +32,6 @@ class VirusTotalApiClient:
 
 class VirusTotalCacheProxy:
     """Proxy: checks local cache before delegating to the real API client."""
-
     STAT_KEYS = ["malicious", "suspicious", "undetected", "harmless", "timeout", "type-unsupported", "failure"]
 
     @staticmethod
@@ -100,14 +97,12 @@ class VirusTotalCacheProxy:
         existing = self._get_existing(file_hash)
         if existing:
             return existing
-
         result = self.provider.get_report_by_hash(file_hash)
         if result and not result.get("error"):
             # Persist provider responses; stale/incomplete payloads are filtered on read.
             file_type = result.get("data", {}).get("attributes", {}).get("type_extension")
             self.save_analysis_result(file_hash=file_hash, analysis_result=result, file_type=file_type)
         return result
-
 
 class VirusTotalService:
     def __init__(self, db: Session):
@@ -118,7 +113,6 @@ class VirusTotalService:
             "accept": "application/json",
             "x-apikey": self.api_key,
         }
-
         self.report_proxy = VirusTotalCacheProxy(
             db=self.db,
             provider=VirusTotalApiClient(base_url=self.base_url, headers=self.headers),
@@ -139,11 +133,8 @@ class VirusTotalService:
 
         # Not in DB — upload to VirusTotal.
         url = f"{self.base_url}/files"
-
         files = {"file": (filename, file_content, content_type)}
-
         response = requests.post(url, headers=self.headers, files=files)
-
         if response.status_code == 200:
             analysis_id = response.json()["data"]["id"]
             self.report_proxy.save_analysis_result(file_hash=file_hash, analysis_result={"_pending": True}, file_type=None)

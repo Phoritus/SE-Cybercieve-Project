@@ -27,6 +27,7 @@ const AuthCallback: React.FC = () => {
     // Check for existing session or listen for auth state change
     const syncUser = async (session: any) => {
       if (session) {
+        // If this is a password recovery flow, redirect to reset password page
         if (flowType === 'recovery') {
           login(session.access_token);
           navigate('/update-password', { replace: true });
@@ -38,7 +39,7 @@ const AuthCallback: React.FC = () => {
         const fullName = user_metadata.full_name || user_metadata.name || "";
         const [firstName, ...lastNameParts] = fullName.split(" ");
         const lastName = lastNameParts.join(" ");
-
+        // Sync user data with our backend database
         try {
           await api.post('/register', {
             id: user.id,
@@ -58,7 +59,7 @@ const AuthCallback: React.FC = () => {
           navigate('/login', { replace: true });
           return;
         }
-
+        // Update state and redirect to scan page
         login(session.access_token);
         navigate('/scan');
       }

@@ -33,9 +33,7 @@ def test_proxy_returns_cached_result_without_calling_provider(monkeypatch):
     provider = DummyReportProvider(result={"error": "should not be called"})
     proxy = VirusTotalCacheProxy(db=None, provider=provider)
     cached_payload = {"data": {"id": "cached-report"}}
-
     monkeypatch.setattr(proxy, "_get_existing", lambda _file_hash: cached_payload)
-
     result = proxy.get_report_by_hash("abc123")
 
     assert result == cached_payload
@@ -52,9 +50,7 @@ def test_proxy_fetches_and_saves_on_cache_miss(monkeypatch):
     }
     provider = DummyReportProvider(result=provider_result)
     proxy = VirusTotalCacheProxy(db=None, provider=provider)
-
     saved_payload = {}
-
     monkeypatch.setattr(proxy, "_get_existing", lambda _file_hash: None)
 
     def _capture_save(file_hash: str, analysis_result: dict, file_type: str | None = None):

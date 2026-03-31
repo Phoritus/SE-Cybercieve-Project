@@ -17,21 +17,22 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    // Check active session on mount
+    // Check session immediately when the page first loads
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       setIsAuthenticated(!!session);
       setLoading(false);
     };
-
     checkSession();
 
-    // Listen for changes
+    // Create a listener to track auth state changes 
+    // (e.g., when user logs out or token expires)
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setIsAuthenticated(!!session);
+      setIsAuthenticated(!!session); // Update global state
       setLoading(false);
     });
 
+    // Cleanup memory when component unmounts
     return () => subscription.unsubscribe();
   }, []);
 

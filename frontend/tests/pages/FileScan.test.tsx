@@ -14,34 +14,34 @@ vi.mock('@/src/api/axios',()=>({
     },
 }));
 
-
+// Mock the global crypto object for the test environment
 describe('FileScan Page Integration Test' ,() =>{
     const ScanReportProbe = () => {
         const location = useLocation();
         const state = location.state as { fileName?: string } | null;
         return <div data-testid="scan-report-probe">{state?.fileName ?? 'no-state'}</div>;
     };
-
+    // Setup a mock crypto implementation before all tests
     beforeAll(() => {
         const mockCrypto = {
             subtle: {
                 digest: vi.fn().mockResolvedValue(new ArrayBuffer(32)),
             },
         };
-        // ต้องมี configurable: true เพื่อบังคับเขียนทับ
+        // Define crypto on both window and globalThis to ensure it's available in all contexts
         Object.defineProperty(window, 'crypto', { value: mockCrypto, configurable: true });
         Object.defineProperty(globalThis, 'crypto', { value: mockCrypto, configurable: true });
     });
     beforeEach(()=>{
         vi.clearAllMocks();
     });
-
+    // Test case 1: Verify that the FileScan page renders correctly in its idle state
     it('1. show screen (Idle State) correct' ,()=>{
         render(<MemoryRouter><FileScan/></MemoryRouter>);
         expect(screen.getByText(/Analyse suspicious files/i)).toBeInTheDocument();
         expect(screen.getByText(/Choose file/i)).toBeInTheDocument();
     });
-
+    // Test case 2: Simulate a file upload and verify that the scan report is displayed correctly when a cached result is returned
     it('2. should process success and show result (cach file scenario)',async ()=>{
         const user = userEvent.setup();
         (api.post as any).mockResolvedValueOnce({
@@ -71,16 +71,13 @@ describe('FileScan Page Integration Test' ,() =>{
         file.arrayBuffer = vi.fn().mockResolvedValue(new ArrayBuffer(32));
         const input = screen.getByLabelText(/Choose file/i);
         await user.upload(input, file);
-
-        
-        
+        // Assert: wait for the scan report to be displayed with the correct file name
         await waitFor(() => {
             expect(screen.getByTestId('scan-report-probe')).toHaveTextContent('test.txt');
         });
-
         expect(api.post).toHaveBeenCalledTimes(1);
     });
-
+    // Test case 3: Simulate a file upload and verify that an error message is displayed when the API connection fails
     it('3. Should display an error massage when api connection fails' , async()=>{
         const user = userEvent.setup();
         (api.post as any).mockRejectedValueOnce({

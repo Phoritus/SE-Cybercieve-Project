@@ -29,7 +29,7 @@ const ForgotPassword: React.FC = () => {
             Type in your email and we&apos;ll send you a link to reset your password
           </p>
 
-          <div className="mx-auto mt-6 w-full max-w-[430px]">
+          <div className="mx-auto mt-6 w-full max-w-107.5">
             <ForgotPasswordForm />
           </div>
         </div>

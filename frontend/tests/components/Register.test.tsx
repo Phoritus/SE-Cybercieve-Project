@@ -15,6 +15,7 @@ vi.mock('@/src/api/supabaseClient', () => ({
 }));
 
 describe('RegisterForm', () => {
+  // Test that the form renders with email, password, and confirm password fields
   it('should render the register form', () => {
     render(
       <MemoryRouter>

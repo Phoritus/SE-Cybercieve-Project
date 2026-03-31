@@ -219,6 +219,7 @@ const Statistics: React.FC = () => {
                   return b.total_scanned - a.total_scanned;
                 })
                 .map((ft) => {
+                // Render chart card for each file type
                 const meta = FILE_TYPE_META[ft.file_type] || DEFAULT_META;
                 const dynamicDetectedColor = ft.detected_percentage > 20 ? '#ef4444' : ft.detected_percentage > 0 ? '#eab308' : '#3b82f6';
                 

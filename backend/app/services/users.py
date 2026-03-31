@@ -10,17 +10,13 @@ class Userservices:
     def __init__(self, db: Session):
         self.db = db
 
-    def get_all_users(self):
-        return self.db.query(DBUser).all()
-    
     def get_user_by_email(self, email: str):
         return self.db.query(DBUser).filter(DBUser.email == email).first()
 
     def get_user_by_id(self, user_id: str):
         return self.db.query(DBUser).filter(DBUser.id == UUID(str(user_id))).first()
-    
-    def create_user(self, user: UserRegister | dict):
 
+    def create_user(self, user: UserRegister | dict):
         # Logic to handle both dict and Pydantic model
         if isinstance(user, dict):
             email = user.get("email")
@@ -47,7 +43,6 @@ class Userservices:
             self.db.commit()
             self.db.refresh(db_user)
             return db_user
-
         except IntegrityError:
             self.db.rollback()
             raise HTTPException(status_code=400, detail="Username or email already exists")
@@ -73,7 +68,6 @@ class Userservices:
             else:
                 # Fallback/Error or try vars()?
                 user_update = vars(user_update)
-
         # Apply explicit updates, including `None`, so nullable fields can be cleared.
         if "username" in user_update:
             db_user.username = user_update["username"]

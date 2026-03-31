@@ -6,7 +6,6 @@ import os
 # Load environment variables from .env
 load_dotenv()
 
-
 class Config(BaseSettings):
   USER: Optional[str] = os.getenv("DB_USER")
   PASSWORD: Optional[str] = os.getenv("DB_PASSWORD")
@@ -28,6 +27,7 @@ class ChatGroqConfig(BaseSettings):
 class VirusTotalConfig(BaseSettings):
   VIRUS_TOTAL_API_KEY: Optional[str] = os.getenv("VIRUS_TOTAL_API_KEY")
 
+# Instantiate config objects
 config = Config()
 supabase_config = SupabaseConfig()
 groq_config = ChatGroqConfig()

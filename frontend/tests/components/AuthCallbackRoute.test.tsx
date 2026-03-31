@@ -14,21 +14,21 @@ vi.mock('@/src/api/supabaseClient', () => ({
     },
   },
 }));
-
+// Mock the useAuth context
 vi.mock('@/src/context/AuthContext', () => ({
   useAuth: () => ({ login: vi.fn() }),
 }));
-
+// Mock the API module
 vi.mock('@/src/api/axios', () => ({
   default: {
     post: vi.fn(),
   },
 }));
-
+// Mock the loading spinner image
 const { mockedNavigate } = vi.hoisted(() => {
   return { mockedNavigate: vi.fn() }
 });
-
+// Mock useNavigate to capture navigation calls
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual('react-router-dom');
   return {
@@ -41,7 +41,7 @@ describe('AuthCallback Component', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
-
+  // Test case for successful session retrieval and user sync
   it('syncs user and redirects to dashboard on session', async () => {
     const mockSession = {
       user: {
@@ -51,7 +51,6 @@ describe('AuthCallback Component', () => {
       },
       access_token: 'fake-token',
     };
-
     vi.mocked(supabase.auth.getSession).mockResolvedValue({ data: { session: mockSession } } as any);
     vi.mocked(supabase.auth.onAuthStateChange).mockReturnValue({ data: { subscription: { unsubscribe: vi.fn() } } } as any);
     (api.post as any).mockResolvedValue({});

@@ -101,6 +101,7 @@ const ScanReport: React.FC = () => {
       setRecLoading(true);
       setRecError(null);
       try {
+        // Send report to LLM for analysis and guidance generation
         const res = await api.post('/recommend/recommendation', state.report, {
           signal: abortController.signal,
         });

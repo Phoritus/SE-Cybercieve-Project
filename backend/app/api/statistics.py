@@ -1,14 +1,11 @@
 import json
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from sqlalchemy import func
 
 from app.db.supabase import get_db, File as DBFile
 
 router = APIRouter()
-
 STAT_KEYS = ["malicious", "suspicious", "undetected", "harmless", "timeout", "type-unsupported", "failure"]
-
 
 def _parse_analysis(raw) -> dict | None:
     """Parse analysis_result column into a dict, return None on failure."""
@@ -21,7 +18,6 @@ def _parse_analysis(raw) -> dict | None:
             return None
     return raw
 
-
 def _is_valid(result: dict) -> bool:
     """Return True if the result has real analysis stats (not pending)."""
     if not isinstance(result, dict):
@@ -32,7 +28,6 @@ def _is_valid(result: dict) -> bool:
     if not stats:
         return False
     return sum(stats.get(k, 0) for k in STAT_KEYS) > 0
-
 
 def _is_malicious(result: dict) -> bool:
     """Return True if the file was flagged as malicious or suspicious."""
@@ -54,15 +49,11 @@ def get_file_statistics(db: Session = Depends(get_db)):
         result = _parse_analysis(f.analysis_result)
         if result is None or not _is_valid(result):
             continue
-
         file_type = (f.file_type or "unknown").lower()
         total_scanned += 1
-
         if file_type not in type_stats:
             type_stats[file_type] = {"total": 0, "detected": 0}
-
         type_stats[file_type]["total"] += 1
-
         if _is_malicious(result):
             type_stats[file_type]["detected"] += 1
             total_detected += 1
@@ -90,7 +81,6 @@ def get_file_statistics(db: Session = Depends(get_db)):
         if ft["detected_percentage"] > highest_risk_pct:
             highest_risk_pct = ft["detected_percentage"]
             highest_risk = ft["file_type"]
-
     detection_rate = round((total_detected / total_scanned) * 100, 1) if total_scanned > 0 else 0
 
     # Filter out malformed entries from the output

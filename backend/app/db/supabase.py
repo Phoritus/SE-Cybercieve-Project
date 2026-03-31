@@ -20,11 +20,9 @@ DATABASE_URL = URL.create(
     port=config.PORT,
     database=config.DBNAME
 )
-EMAIL_REGEX = re.compile(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
 
 # Create the SQLAlchemy engine
 engine = create_engine(DATABASE_URL)
-
 
 # Test the connection
 try:
@@ -32,15 +30,13 @@ try:
         print("Connection successful!✅")
 except Exception as e:
     print(f"Failed to connect: {e}❌")
-
+# Create a configured "Session" class
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-
+# Define the base class for models
 class Base(DeclarativeBase):
     pass
-
-# Create table
-
+EMAIL_REGEX = re.compile(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
 
 class User(Base):
     __tablename__ = "users"
@@ -65,8 +61,8 @@ class File(Base):
     analysis_result: Mapped[json] = mapped_column(String, nullable=False)
     file_type: Mapped[str | None] = mapped_column(String(50), nullable=True)
 
-# Base.metadata.create_all(engine)
-
+# Create tables and models
+Base.metadata.create_all(engine)
 
 def get_db():
     db = SessionLocal()

@@ -19,17 +19,20 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
 
+  // Handle email/password login
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
     setError(null)
 
     try {
+      // Verify email and password with Supabase
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
       })
       if (error) throw error
+      // On success, user session is automatically set by Supabase's auth state listener.
       navigate('/scan', { replace: true })
 
     } catch (error: unknown) {
@@ -38,12 +41,13 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
       setIsLoading(false)
     }
   }
-
+  // Handle OAuth logins (Google, GitHub)
   const handleGoogleLogin = async () => {
     try {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
+          // URL to redirect to after Google auth. Must be registered in Supabase dashboard.
           redirectTo: `${window.location.origin}/auth/callback`
         }
       })

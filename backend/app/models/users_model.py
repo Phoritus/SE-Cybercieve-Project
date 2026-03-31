@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 
 
+# Define Pydantic models for user operations
 class UserRegister(BaseModel):
     id: str
     email: str

@@ -97,7 +97,6 @@ class LLMService:
                 "suspicious_imports": found_suspicious_imports
             }
         }
-
         return json.dumps(filtered_data, indent=4)
 
     def get_response(self, json_data: str) -> str:

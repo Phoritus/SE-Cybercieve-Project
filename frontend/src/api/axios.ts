@@ -11,10 +11,13 @@ const api = axios.create({
 });
 
 
-// Add a request interceptor
+// Interceptor will always run "before" the request is sent to the backend
 api.interceptors.request.use(
   async (config) => {
+    // Get the latest session
     const { data: { session } } = await supabase.auth.getSession();
+    
+    // If a token exists, attach it to the request header (Bearer Token)
     if (session?.access_token) {
       config.headers.Authorization = `Bearer ${session.access_token}`;
     }

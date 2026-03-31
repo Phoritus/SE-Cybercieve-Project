@@ -32,14 +32,6 @@ def update_current_user(user_update: UserUpdate, db: Session = Depends(get_db), 
     try:
         payload = AuthService(supabase_client, get_db()).verify_token(token)        
         email = payload.get("email")
-        # Find local user by email
-        # We need a service method for this.
-        # Let's add get_user_by_email to Userservices first.
-        
-        # For now, let's assume we can query by email in the service update method or add a helper.
-        # Let's modify Userservices to update by email or add get_by_email.
-        
-        # Actually, let's just use the email from the token to find the user.
         user = Userservices(db).get_user_by_email(email)
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
@@ -52,14 +44,3 @@ def update_current_user(user_update: UserUpdate, db: Session = Depends(get_db), 
 @router.post("/register")
 def register(user: UserRegister, db: Session = Depends(get_db)):
     return AuthService(supabase_client, db).register(user)
-
-@router.get("/users")
-def get_all_users(db: Session = Depends(get_db)):
-    # user is authenticated if we get here
-    return Userservices(db).get_all_users()
-
-@router.delete("/users/{user_id}")
-def delete_user(user_id: str, db: Session = Depends(get_db)):
-    # user is authenticated if we get here
-    return Userservices(db).delete_user(user_id)
-

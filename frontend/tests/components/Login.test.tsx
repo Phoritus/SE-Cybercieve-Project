@@ -21,11 +21,11 @@ describe('LoginForm', () => {
         <LoginForm />
       </MemoryRouter>
     );
-
+    // Check for presence of email and password fields
     expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/password/i)).toBeInTheDocument();
   });
-
+  // Test that the first button is the login button and can be clicked
   it('first button should render Login and can click', () => {
     render(
       <MemoryRouter>

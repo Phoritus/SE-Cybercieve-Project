@@ -180,9 +180,9 @@ const FileScan: React.FC = () => {
         fileHash,
         progress: 'Waiting for analysis to start…',
       });
-
+      // Handling polling to wait for results from VirusTotal
       const MAX_RETRIES = 60;
-      const POLL_INTERVAL = 10_000;
+      const POLL_INTERVAL = 10_000; // 10 seconds
       let completedReport: any | null = null;
       let resolvedHash = fileHash;
 
@@ -203,13 +203,14 @@ const FileScan: React.FC = () => {
             params: { file_hash: fileHash },
           });
           const analysisData = analysisRes.data;
+          // If completed, exit the loop
           if (analysisData?.status === 'completed') {
             resolvedHash = analysisData?.sha256 ?? fileHash;
             completedReport = analysisData?.report ?? null;
             break;
           }
         } catch {
-          // Keep retrying until max attempts.
+          // If there's an error, retry until the limit is reached
         }
       }
 
