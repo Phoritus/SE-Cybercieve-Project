@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { useAuth } from './context/AuthContext';
@@ -16,10 +16,37 @@ import Statistics from './pages/Statistics';
 import ProtectedRoute from './components/ProtectedRoute';
 import LoadingSpinner from './components/LoadingSpinner';
 
+const APP_NAME = 'CyberSieve';
+const PAGE_TITLES: Record<string, string> = {
+  '/': 'Home',
+  '/login': 'Login',
+  '/register': 'Register',
+  '/forgot-password': 'Forgot Password',
+  '/update-password': 'Update Password',
+  '/auth/callback': 'Authenticating',
+  '/scan': 'File Scan',
+  '/scan-report': 'Scan Report',
+  '/scan-details': 'Scan Details',
+  '/statistics': 'Statistics',
+  '/profile': 'Profile',
+};
+
+const RouteTitleManager: React.FC = () => {
+  const location = useLocation();
+
+  useEffect(() => {
+    const pageTitle = PAGE_TITLES[location.pathname] ?? 'Page';
+    document.title = `${pageTitle} | ${APP_NAME}`;
+  }, [location.pathname]);
+
+  return null;
+};
+
 const App: React.FC = () => {
   return (
     <AuthProvider>
       <Router>
+        <RouteTitleManager />
         <Routes>
           <Route path="/login" element={<RedirectIfAuthenticated><Login /></RedirectIfAuthenticated>} />
           <Route path="/register" element={<RedirectIfAuthenticated><Register /></RedirectIfAuthenticated>} />
