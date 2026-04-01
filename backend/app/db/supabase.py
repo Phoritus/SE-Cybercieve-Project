@@ -58,7 +58,7 @@ class User(Base):
 class File(Base):
     __tablename__ = "files"
     file_hash: Mapped[str] = mapped_column(String(255), primary_key=True, nullable=False)
-    analysis_result: Mapped[json] = mapped_column(String, nullable=False)
+    analysis_result: Mapped[json] = mapped_column(String, nullable=False) # type: ignore
     file_type: Mapped[str | None] = mapped_column(String(50), nullable=True)
 
 # Create tables and models
